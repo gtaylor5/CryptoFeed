@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="#123"
+    app:cardCornerRadius="@dimen/corner_radius"
+    app:cardElevation="24dp"
+    android:clipChildren="true"
+    android:id="@+id/currencyView">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/card_color"
+        android:background="@drawable/rounded_corners">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="125dp"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:backgroundTint="@color/card_color"
+            android:id="@+id/priceViews">
+
+            <ImageView
+                android:id="@+id/share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_toLeftOf="@id/favorite"
+                android:src="@drawable/ic_share_white_24dp"
+                android:layout_alignParentBottom="true"/>
+
+            <ImageView
+                android:id="@+id/favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/heart"
+                android:layout_alignParentBottom="true"/>
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/rounded_corners"
+                android:backgroundTint="@color/card_color"
+                android:id="@+id/currency_logo"
+                android:padding="5dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_toEndOf="@id/currency_logo"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:layout_centerVertical="true">
+
+                <TextView
+                    android:id="@+id/currency_symbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="BTC"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/card_text"
+                    android:layout_alignParentTop="true"/>
+
+                <TextView
+                    android:id="@+id/curreny_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="Bitcoin"
+                    android:maxLines="2"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/card_text"
+                    android:layout_below="@id/currency_symbol"
+                    android:maxLength="15"/>
+
+                <TextView
+                    android:id="@+id/currencyPercentageChange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="+24.21%"
+                    android:layout_below="@+id/currencyPrice"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_alignTop="@+id/curreny_name"
+                    android:textColor="@color/card_text"
+                    android:layout_marginLeft="10dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="$7500.25"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@+id/currency_symbol"
+                    android:layout_marginRight="10dp"
+                    android:id="@+id/currencyPrice"
+                    android:textColor="@color/card_text"/>
+
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

@@ -1,0 +1,130 @@
+{
+  "project_info": {
+    "project_number": "508855545650",
+    "firebase_url": "https://cryptofeels.firebaseio.com",
+    "project_id": "cryptofeels",
+    "storage_bucket": "cryptofeels.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508855545650:android:1007927226618d00",
+        "android_client_info": {
+          "package_name": "com.cryptoinc.cryptofeels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508855545650-eg4g231nmft58hsb7vqj3qmlrfc9lout.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cryptoinc.cryptofeels",
+            "certificate_hash": "159d09a49cef70812d45a266876953e986aea871"
+          }
+        },
+        {
+          "client_id": "508855545650-oc8o7o08tef1jnc1qr1mdckrpa9mh91f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJRTseruNmxzQyQ_s3sshI_eXI5Yg-epc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508855545650-oc8o7o08tef1jnc1qr1mdckrpa9mh91f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508855545650:android:1980d61d28b9bb55",
+        "android_client_info": {
+          "package_name": "com.cryptoinc.CryptoFeels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508855545650-oc8o7o08tef1jnc1qr1mdckrpa9mh91f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJRTseruNmxzQyQ_s3sshI_eXI5Yg-epc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508855545650:android:d0eb5efb317bb57f",
+        "android_client_info": {
+          "package_name": "com.cryptoinc.cryptofeed"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "508855545650-juvup9p05e5s8uhudoefmouhtlnulpnm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cryptoinc.cryptofeed",
+            "certificate_hash": "159d09a49cef70812d45a266876953e986aea871"
+          }
+        },
+        {
+          "client_id": "508855545650-oc8o7o08tef1jnc1qr1mdckrpa9mh91f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJRTseruNmxzQyQ_s3sshI_eXI5Yg-epc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "508855545650-oc8o7o08tef1jnc1qr1mdckrpa9mh91f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

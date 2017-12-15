@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/background">
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@color/card_color"
+        app:cardElevation="10dp"
+        android:layout_centerInParent="true">
+        <LinearLayout
+            android:orientation="vertical" android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/card_color"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:id="@+id/alertHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_up"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                style="@style/Base.TextAppearance.AppCompat.Medium"/>
+
+            <EditText
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:id="@+id/email_prof"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:textColorHint="@color/negative_red"
+                android:backgroundTint="@color/white"
+                android:layout_margin="10dp"
+                android:textColor="@color/negative_red"/>
+
+            <EditText
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:id="@+id/password_prof"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:textColorHint="@color/negative_red"
+                android:backgroundTint="@color/white"
+                android:layout_margin="10dp"
+                android:textColor="@color/negative_red"/>
+
+            <Button
+                android:id="@+id/signup_prof"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/negative_red"
+                android:layout_margin="10dp"
+                android:text="@string/submit"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/switchview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already Registered? Login"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>

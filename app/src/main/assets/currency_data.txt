@@ -1,0 +1,203 @@
+Bitcoin,1182,BTC,BTC, null
+Bitcoin Cash,202330,BCH,BCC, null
+Litecoin,3808,LTC,LTC, null
+DigitalCash,3807,DASH,DASH,Dash
+Monero,5038,XMR,XMR, null
+Nxt,1183,NXT,NXT,NXT
+Ethereum Classic,5324,ETC,ETC, null
+Dogecoin,4432,DOGE,DOGE, null
+ZCash,24854,ZEC,ZEC, null
+DigiByte,4430,DGB,DGB,Digibyte
+Ripple,5031,XRP,XRP, null
+BitcoinDark,4400,BTCD,BTCD, null
+PeerCoin,2349,PPC,PPC,Peercoin
+GeoCoin,3647,GEO,GEO, null
+Spreadcoin,3649,SPR,SPR,SpreadCoin
+Aurora Coin,4333,AUR,AUR,AuroraCoin
+BitBean,4338,BITB,BITB, null
+BlackCoin,4339,BLK,BLK, null
+MyriadCoin,4345,XMY,XMY,Myriad
+EnergyCoin,4350,ENRG,ENRG, null
+CannabisCoin,4407,CANN,CANN, null
+CLAMS,4416,CLAM,CLAM,CLAMs
+CloakCoin,4417,CLOAK,CLOAK, null
+Diamond,4431,DMD,DMD, null
+Verge,4433,XVG,XVG, null
+E-Gulden,4438,EFL,EFL,ElectronicGulden
+Einsteinium,4440,EMC2,EMC2, null
+Exclusive Coin,4442,EXCL,EXCL,ExclusiveCoin
+FeatherCoin,4524,FTC,FTC,Feathercoin
+GoldCoin,4528,GLD,GLD, null
+IOCoin,4540,IOC,IOC,I/OCoin
+NavCoin,4571,NAV,NAV,NAVCoin
+PotCoin,4587,POT,POT, null
+ReddCoin,4592,RDD,RDD, null
+Stellar,4614,XLM,XLM,Lumen
+BitSwift,4616,SWIFT,SWIFT,Bitswift
+SysCoin,4618,SYS,SYS, null
+UnbreakableCoin,4629,UNB,UNB, null
+ViaCoin,5015,VIA,VIA, null
+VeriCoin,5017,VRC,VRC, null
+VertCoin,5018,VTC,VTC,Vertcoin
+WhiteCoin,20338,XWC,XWC, null
+StealthCoin,5032,XST,XST, null
+DigitalNote,5282,XDN,XDN, null
+NEM,5285,XEM,XEM,NewEconomyMovement
+BurstCoin,5286,BURST,BURST,BURSTCoin
+NuBits,5287,NBT,NBT,Nubits
+StartCoin,5289,START,START, null
+CounterParty,5292,XCP,XCP,Counterparty
+MaidSafe Coin,5293,MAID,MAID,MaidSafe
+MonaCoin,5296,MONA,MONA, null
+BitBay,5300,BAY,BAY, null
+Vcash,5303,XVC,XVC, null
+BlockNet,5305,BLOCK,BLOCK, null
+ByteCent,5308,BYC,BYC,Bytecent
+GridCoin,5309,GRC,GRC, null
+FairCoin,5313,FAIR,FAIR, null
+Gulden,5315,NLG,NLG, null
+RubyCoin,5316,RBY,RBY, null
+PesetaCoin,5317,PTC,PTC, null
+Kore,5318,KORE,KORE, null
+FlorinCoin,5325,FLO,FLO,Florin
+Coin Magi,5331,XMG,XMG,Magi
+ArtByte,5338,ABY,ABY, null
+Folding Coin,5348,FLDC,FLDC,FoldingCoin
+SolarCoin,5349,SLR,SLR, null
+NeosCoin,5370,NEOS,NEOS, null
+Vtorrent,5372,VTR,VTR,vTorrent
+PinkCoin,5374,PINK,PINK, null
+TrustPlus,5384,TRUST,TRUST, null
+Curecoin,5387,CURE,CURE,CureCoin
+Gambit coin,6102,GAM,GAM,Gambit
+Nexus,6103,NXS,NXS, null
+Sphere Coin,6111,SPHR,SPHR,Sphere
+Crown Coin,7586,CRW,CRW,Crown
+ParkByte,8764,PKB,PKB, null
+Synergy,8825,SNRG,SNRG, null
+Expanse,12194,EXP,EXP, null
+Global Currency Reserve,12217,GCR,GCR,GlobalCurrencyReserve
+Transfer,13045,TX,TX,TransferCoin
+Groestlcoin,13070,GRS,GRS, null
+Siacoin,13072,SC,SC, null
+Factoids,13280,FCT,FCT,Factom
+CapriCoin,15282,CPC,CPC, null
+ClubCoin,15869,CLUB,CLUB, null
+Radium,15870,RADS,RADS, null
+Emercoin,15876,EMC,EMC,EmerCoin
+BlitzCoin,15879,BLITZ,BLITZ,Blitzcash
+EverGreenCoin,15885,EGC,EGC, null
+Decred,16713,DCR,DCR, null
+Creditbit,17547,CRB,CRB,CreditBit
+Augur,17778,REP,REP, null
+OKCash,17857,OK,OK,OkCash
+Voxels,18180,VOX,VOX, null
+Synereo,18244,AMP,AMP,AMP
+Digix DAO,18907,DGD,DGD, null
+Lisk,19745,LSK,LSK, null
+Waves,20131,WAVES,WAVES, null
+Gamecredits,20157,GAME,GAME,GameCredits
+BitCrystals,20315,BCY,BCY, null
+Steem,20333,STEEM,STEEM,STEEM
+Influxcoin,20446,INFX,INFX,InfluxCoin
+Ionomy,20591,ION,ION,Ion
+HempCoin,20655,HMP,THC, null
+SaluS,20681,SLS,SLS, null
+AeonCoin,20730,AEON,AEON,Aeon
+SibCoin,20745,SIB,SIB,Siberian Chervonets
+EuropeCoin,20748,ERC,ERC, null
+Pepe,20825,MEME,MEME,Memetic
+BreakoutCoin,20892,BRK,BRK,Breakout
+2GiveCoin,20910,2GIVE,2GIVE,2GIVE
+SafeExchangeCoin,20594,SAFEX,SAFEX, null
+Rise,22015,RISE,RISE, null
+MonetaryUnit,22325,MUE,MUE, null
+Bancor Network Token,22327,BNT,BNT,Bancor
+BitSend,22329,BSD,BSD, null
+Project Decorum,22352,PDC,PDC, null
+Omni,22441,OMNI,OMNI,OMNI
+LBRY Credits,23432,LBC,LBC, null
+Steem Backed Dollars,23728,SBD,SBD,SteemDollars
+Stratis,24294,STRAT,STRAT, null
+SingularDTV,24926,SNGLS,SNGLS, null
+Xaurum,25082,XAUR,XAUR, null
+Decent,25721,DCT,DCT,DECENT
+Wings DAO,25946,WINGS,WINGS, null
+Komodo,26132,KMD,KMD, null
+NEO,27368,NEO,NEO,Neo
+Syndicate,27591,SYNX,SYNX, null
+Trigger,27996,TRIG,TRIG,TRIG Token
+Circuits of Value,28276,COVAL,COVAL, null
+Verium,28323,VRM,VRM, null
+FirstBlood,28328,1ST,1ST, null
+DopeCoin,28332,DOPE,DOPE, null
+The Hempcoin,29924,THC,THC,HempCoin
+ZCoin,30022,XZC,XZC, null
+Ardor,30173,ARDR,ARDR, null
+Byteball,30736,GBYTE,GBYTE,Bytes
+ZClassic,32544,ZCL,ZCL,Zclassic
+ARK,32699,ARK,ARK,Ark
+Golem Network Token,33022,GNT,GNT,Golem
+Time,33914,TIME,TIME, null
+Tokes,35124,TKS,TKS, null
+Nexium,35678,NXC,NXC, null
+Incent,35823,INCNT,INCNT, null
+Enigma,338335,ENG,ENG, null
+TrustCoin,37040,TRST,TRST,Trustcoin
+Shift,38307,SHIFT,SHIFT, null
+Golos,40806,GOLOS,GOLOS, null
+Private Instant Verified Transaction,42433,PIVX,PIVX,Pivx
+Internet of People,42596,IOP,IOP,Internet Of People
+Ubiq,43044,UBQ,UBQ, null
+Melon,45253,MLN,MLN, null
+TenX,45260,PAY,PAY,TenX Pay Token
+Swarm City Token,50741,SWT,SWT, null
+Musiccoin,53950,MUSIC,MUSIC,Musicoin
+Databits,55540,DTB,DTB, null
+Edgeless,55676,EDG,EDG, null
+Mercury,61138,MER,MER, null
+iEx.ec,61877,RLC,RLC, null
+Gnosis,66193,GNO,GNO, null
+Legends Cryptocurrency,66259,LGD,LGD,Legends
+Guppy,67096,GUP,GUP, null
+Lunyr,67447,LUN,LUN, null
+LomoCoin,70469,LMC,LMC,Lomocoin
+TokenCard,71077,TKN,TKN, null
+Humaniq,72438,HMQ,HMQ, null
+Apx,74912,APX,APX, null
+Aragon,78152,ANT,ANT, null
+Basic Attention Token,107672,BAT,BAT, null
+QTUM,112392,QTUM,QTUM,Qtum
+ZenCash,116180,ZEN,ZEN,Zencash
+Qwark,116425,QWARK,QWARK, null
+Quantum Resistant Ledger,127667,QRL,QRL, null
+Patientory,129035,PTOY,PTOY, null
+Dynamic,131111,DYN,DYN, null
+Sequence,131112,SEQ,SEQ, null
+Mysterium,136190,MYST,MYST, null
+Cofound.it,136984,CFI,CFI, null
+Status Network Token,137013,SNT,SNT, null
+Civic,139467,CVC,CVC, null
+Monaco,166548,MCO,MCO, null
+Numerai,166594,NMR,NMR,Numeraire
+AdEx,170452,ADX,ADX, null
+Blocktix,175671,TIX,TIX, null
+district0x,177175,DNT,DNT, null
+Elastic,178861,XEL,XEL, null
+FunFair,178978,FUN,FUN, null
+Metal,179164,MTL,MTL, null
+Storj,187347,STORJ,STORJ, null
+OmiseGo,187440,OMG,OMG, null
+AdToken,188858,ADT,ADT,adToken
+Particl,191116,PART,PART, null
+Agoras Token,191142,AGRS,AGRS,IDNI Agoras
+Viberate,198710,VIB,VIB, null
+Decentraland,199148,MANA,MANA, null
+Breakout Stake,299415,BRX,BRX, null
+Ripio,307219,RCN,RCN,Ripio Credit Network
+Salt Lending,314580,SALT,SALT,Salt
+Cardano,321992,ADA,ADA,Ada
+Power Ledger,339617,POWR,POWR,PowerLedger
+Bitcoin Gold,347235,BTG,BTG, null
+eBoost,368732,EBST,EBST, null
+Ethereum,7605,ETH,ETH, null

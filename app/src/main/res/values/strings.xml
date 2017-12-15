@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">CryptoFeed</string>
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="price_open">Price (Close): </string>
+    <string name="price_low">Price (Low): </string>
+    <string name="price_high">Price (High): </string>
+    <string name="block_reward">Block Reward: </string>
+    <string name="current_block_number">Current Block Number: </string>
+    <string name="proof_of_work_pow">Proof of Work (PoW): </string>
+    <string name="algorithm">Algorithm: </string>
+    <string name="proof_type">Proof Type: </string>
+    <string name="volume">Volume:</string>
+    <string name="currency_details">Currency Details</string>
+    <string name="none">None</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search">Search</string>
+    <string name="social_media_activity">Social Media Statistics</string>
+    <string name="market_pressure">Market Pressure</string>
+    <string name="_24_hr_high">24 Hr High</string>
+    <string name="_24_hr_low">24 Hr Low</string>
+    <string name="_24hrvolume">24 Hr Volume</string>
+    <string name="about">About</string>
+    <string name="stats">Price Statistics</string>
+    <string name="greed">GREED</string>
+    <string name="fear">FEAR</string>
+    <string name="neutral">NEUTRAL</string>
+    <string name="def">--</string>
+    <string name="sms">Social Media Sentiment</string>
+    <string name="socialmediaactivity">24 Hr Social Media Activity</string>
+    <string name="social_media_sentiment_breakdown">Social Media Sentiment Breakdown</string>
+    <string name="sell">SELLING</string>
+    <string name="buy">BUYING</string>
+    <string name="please_sign_up_to_add_favorites">Sign Up to Add Favorites</string>
+    <string name="please_sign_in_to_add_favorites">Sign In to Add Favorites</string>
+    <string name="email">email</string>
+    <string name="password">password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="leave_a_suggestion">Leave a Suggestion</string>
+    <string name="donate">Donate</string>
+    <string name="remove_ads">Remove Ads</string>
+    <string name="logout">Logout</string>
+    <string name="feedback">Feedback</string>
+    <string name="leave_some_feedback">Leave Some Feedback</string>
+    <string name="submit">Submit</string>
+    <string name="newuser">New User? Sign Up</string>
+    <string name="login">Sign In</string>
+    <string name="already">Already Registered? Sign In</string>
+    <string name="send">Send</string>
+</resources>

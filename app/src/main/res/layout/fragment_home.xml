@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.cryptoinc.cryptofeed.HomeFragment">
+
+    <com.mancj.materialsearchbar.MaterialSearchBar
+        style="@style/MaterialSearchBarDark"
+        app:mt_hint="Search for Currency"
+        app:mt_maxSuggestionsCount="10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchBar"
+        app:mt_searchBarColor="@color/card_color"
+        app:mt_hintColor="@color/negative_red"
+        app:mt_placeholderColor="@color/negative_red"
+        app:mt_placeholder="@string/app_name"
+        app:mt_searchIconTint="@color/negative_red"
+        app:mt_textColor="@color/negative_red"
+        android:layout_margin="15dp"
+        app:mt_navIconEnabled="false" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/currencyList"
+        android:layout_below="@id/searchBar" />
+
+
+</RelativeLayout>

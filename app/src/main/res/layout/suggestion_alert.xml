@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/card_color">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/leave_some_feedback"
+        android:textColor="@color/white"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        style="@style/Base.TextAppearance.AppCompat.Medium"/>
+
+    <EditText
+        android:id="@+id/suggestionBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="top|left"
+        android:backgroundTint="@android:color/transparent"
+        android:lines="10"
+        android:minLines="5"
+        android:maxLines="15" />
+
+    <Button
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@color/negative_red"
+        android:text="@string/submit"
+        android:textColor="@color/white" />
+
+</LinearLayout>

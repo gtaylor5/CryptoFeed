@@ -78,8 +78,10 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
                             for(DataSnapshot snapshot : dataSnapshot.getChildren()){
                                 if(((String)(snapshot.getValue())).equalsIgnoreCase(holder.currencySymbol.getText().toString())){
                                     DatabaseReference ref = reference.child(snapshot.getKey());
+                                    favorites.remove(holder.currencySymbol.getText().toString());
                                     ref.setValue(null);
                                     holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
+                                    notifyDataSetChanged();
                                     return;
                                 }
                             }

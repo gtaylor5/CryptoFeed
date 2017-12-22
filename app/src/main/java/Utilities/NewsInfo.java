@@ -14,21 +14,13 @@ import java.util.Locale;
 
 public class NewsInfo implements Comparable<NewsInfo>{
 
-    private String Title;
-    private String Link;
-    private String Source;
-    private String pubDate;
-    private String description;
+    public String Title;
+    public String Link;
+    public String Source;
+    public String pubDate;
+    public String description;
 
-    private long dateInMills;
-
-    public NewsInfo(String link, String source, String title, String pubDate, String description) {
-        Link = link;
-        Source = source;
-        Title = title;
-        this.pubDate = pubDate;
-        this.description = description;
-    }
+    public long dateInMills;
 
     public NewsInfo(){}
 
@@ -40,7 +32,7 @@ public class NewsInfo implements Comparable<NewsInfo>{
         Link = link;
     }
 
-    public String getSource() {
+    String getSource() {
         return Source;
     }
 

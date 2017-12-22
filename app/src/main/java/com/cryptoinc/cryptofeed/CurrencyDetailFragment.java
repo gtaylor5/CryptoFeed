@@ -2,19 +2,16 @@ package com.cryptoinc.cryptofeed;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -129,7 +126,6 @@ public class CurrencyDetailFragment extends Fragment {
     final String baseURL = "https://bittrex.com/api/v1.1/public/getmarketsummary?market=";
     final String baseSocialActivityURL = "https://frypto-backend.herokuapp.com/api/coins?auth=90886b14-0fd5-4b0f-a9a1-9bd847ebd92e&symbol=";
     final String baseCurrencyAboutURL = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
-
     
     final Runnable runnable = new Runnable() {
         @Override
@@ -161,7 +157,7 @@ public class CurrencyDetailFragment extends Fragment {
         return v;
     }
 
-    private void loadInitialChart() {
+    public void loadInitialChart() {
         minuteData.setPressed(true);
         minuteData.setPressed(true);
         hourData.setTextColor(Color.WHITE);
@@ -180,50 +176,49 @@ public class CurrencyDetailFragment extends Fragment {
         getCoinSnapshot();
     }
 
-    private void initializeViews(View v) {
+    public void initializeViews(View v) {
 
+            currencyLabel = v.findViewById(R.id.currencyLabel);
+            currencyPrice = v.findViewById(R.id.price);
+            currencyPercentageChange = v.findViewById(R.id.percentageChange);
+            priceView = v.findViewById(R.id.priceView);
+            timestamp = v.findViewById(R.id.timestamp);
 
-        currencyLabel =  v.findViewById(R.id.currencyLabel);
-        currencyPrice = v.findViewById(R.id.price);
-        currencyPercentageChange =  v.findViewById(R.id.percentageChange);
-        priceView =  v.findViewById(R.id.priceView);
-        timestamp = v.findViewById(R.id.timestamp);
+            twitterSocialActivity = v.findViewById(R.id.twitterSocialActivity);
+            redditSocialActivity = v.findViewById(R.id.redditSocialActivity);
+            fearOrGreed = v.findViewById(R.id.fearOrGreed);
 
-        twitterSocialActivity = v.findViewById(R.id.twitterSocialActivity);
-        redditSocialActivity = v.findViewById(R.id.redditSocialActivity);
-        fearOrGreed = v.findViewById(R.id.fearOrGreed);
+            priceHigh = v.findViewById(R.id.high);
+            priceLow = v.findViewById(R.id.low);
+            volume = v.findViewById(R.id.volume);
 
-        priceHigh = v.findViewById(R.id.high);
-        priceLow = v.findViewById(R.id.low);
-        volume = v.findViewById(R.id.volume);
+            socialMediaActivity = v.findViewById(R.id.socialMediaActivity);
+            statisticsView = v.findViewById(R.id.statisticsView);
+            aboutView = v.findViewById(R.id.aboutView);
 
-        socialMediaActivity = v.findViewById(R.id.socialMediaActivity);
-        statisticsView = v.findViewById(R.id.statisticsView);
-        aboutView = v.findViewById(R.id.aboutView);
+            happySentiment = v.findViewById(R.id.positiveSentiment);
+            sadSentiment = v.findViewById(R.id.negativeSentiment);
+            neutralSentiment = v.findViewById(R.id.neutralSentiment);
 
-        happySentiment = v.findViewById(R.id.positiveSentiment);
-        sadSentiment = v.findViewById(R.id.negativeSentiment);
-        neutralSentiment = v.findViewById(R.id.neutralSentiment);
+            parentView = v.findViewById(R.id.activity_currency_detail);
 
-        parentView = v.findViewById(R.id.activity_currency_detail);
+            priceGraph = v.findViewById(R.id.currencyChart);
+            chartProgress = v.findViewById(R.id.chartProgress);
 
-        priceGraph = v.findViewById(R.id.currencyChart);
-        chartProgress = v.findViewById(R.id.chartProgress);
+            minuteData = v.findViewById(R.id.minuteChart);
+            hourData = v.findViewById(R.id.hourChart);
+            dayData = v.findViewById(R.id.dayChart);
 
-        minuteData = v.findViewById(R.id.minuteChart);
-        hourData = v.findViewById(R.id.hourChart);
-        dayData = v.findViewById(R.id.dayChart);
+            aboutCardView = v.findViewById(R.id.aboutCardView);
+            aboutText = v.findViewById(R.id.aboutText);
 
-        aboutCardView = v.findViewById(R.id.aboutCardView);
-        aboutText = v.findViewById(R.id.aboutText);
-
-        setOnClickListeners();
+            setOnClickListeners();
     }
 
-    private void updateViews(){
+    public void updateViews(){
         if(currencyInfo.getSymbol().equalsIgnoreCase("btc")){
             if(!chartClicked) {
-                priceView.setText(formatter.format(currencyInfo.getBTC_USD()));
+                priceView.setText(formatter.format(currencyInfo.getLast()));
                 parseDate();
             }
         } else {
@@ -238,20 +233,21 @@ public class CurrencyDetailFragment extends Fragment {
         }
         String sign = (currencyInfo.getPercentageChange() >= 0 ? "+" : "");
         currencyPercentageChange.setText(String.format(Locale.US, sign+"%.2f%%", currencyInfo.getPercentageChange()));
-        currencyPercentageChange.setTextColor((currencyInfo.getPercentageChange() >= 0) ? getResources().getColor(R.color.positive, null) : getResources().getColor(R.color.negative_red, null));
-        statisticsView.setText(R.string.stats);
-        aboutView.setText(R.string.about);
-        if(currencyInfo.getOpenBuyOrders() >= currencyInfo.getOpenSellOrders()){
-            fearOrGreed.setText(R.string.buy);
-            fearOrGreed.setTextColor(getResources().getColor(R.color.positive, null));
-        } else if (currencyInfo.getOpenSellOrders() > currencyInfo.getOpenBuyOrders()){
-            fearOrGreed.setText(R.string.sell);
-            fearOrGreed.setTextColor(getResources().getColor(R.color.negative_red, null));
+        if(isAdded()) {
+            currencyPercentageChange.setTextColor((currencyInfo.getPercentageChange() >= 0) ? getResources().getColor(R.color.positive, null) : getResources().getColor(R.color.negative_red, null));
+            statisticsView.setText(R.string.stats);
+            aboutView.setText(R.string.about);
+            if (currencyInfo.getOpenBuyOrders() >= currencyInfo.getOpenSellOrders()) {
+                fearOrGreed.setText(R.string.buy);
+                fearOrGreed.setTextColor(getResources().getColor(R.color.positive, null));
+            } else if (currencyInfo.getOpenSellOrders() > currencyInfo.getOpenBuyOrders()) {
+                fearOrGreed.setText(R.string.sell);
+                fearOrGreed.setTextColor(getResources().getColor(R.color.negative_red, null));
+            }
         }
-
     }
 
-    private void setOnClickListeners() {
+    public void setOnClickListeners() {
         minuteData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -265,12 +261,14 @@ public class CurrencyDetailFragment extends Fragment {
                 minuteData.setPressed(true);
                 hourData.setTextColor(Color.WHITE);
                 dayData.setTextColor(Color.WHITE);
-                hourData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
-                dayData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
+                if(isAdded()) {
+                    hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                    dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
 
-                minuteData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                minuteData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                setStyling(minuteChartData,"Minutely Chart");
+                    minuteData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                    setStyling(minuteChartData, "Minutely Chart");
+                }
             }
         });
 
@@ -284,16 +282,18 @@ public class CurrencyDetailFragment extends Fragment {
                 if (dayData.isPressed()) {
                     dayData.setPressed(false);
                 }
-                hourData.setPressed(true);
-                minuteData.setTextColor(Color.WHITE);
-                dayData.setTextColor(Color.WHITE);
+                if(isAdded()) {
+                    hourData.setPressed(true);
+                    minuteData.setTextColor(Color.WHITE);
+                    dayData.setTextColor(Color.WHITE);
 
-                minuteData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
-                dayData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
+                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                    dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
 
-                hourData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                hourData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                setStyling(hourChartData,"Hourly Chart");
+                    hourData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                    hourData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                    setStyling(hourChartData, "Hourly Chart");
+                }
             }
         });
 
@@ -307,22 +307,24 @@ public class CurrencyDetailFragment extends Fragment {
                 if (minuteData.isPressed()) {
                     minuteData.setPressed(false);
                 }
-                hourData.setTextColor(Color.WHITE);
-                minuteData.setTextColor(Color.WHITE);
-                dayData.setPressed(true);
+                if(isAdded()) {
+                    hourData.setTextColor(Color.WHITE);
+                    minuteData.setTextColor(Color.WHITE);
+                    dayData.setPressed(true);
 
-                minuteData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
-                hourData.setBackgroundColor(getResources().getColor(R.color.card_color,null));
+                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                    hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
 
-                dayData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                dayData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                setStyling(dayChartData,"Daily Chart");
+                    dayData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                    dayData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                    setStyling(dayChartData, "Daily Chart");
+                }
             }
         });
 
     }
 
-    private void setStyling(ArrayList<Entry> chartData, String label) {
+    public void setStyling(ArrayList<Entry> chartData, String label) {
 
 
         LineDataSet lineDataSet = new LineDataSet(chartData, label);
@@ -338,7 +340,7 @@ public class CurrencyDetailFragment extends Fragment {
         xAxis.setLabelCount(3);
         xAxis.setDrawGridLines(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextColor(getResources().getColor(R.color.card_text));
+        xAxis.setTextColor(getResources().getColor(R.color.card_text, null));
         xAxis.setDrawAxisLine(true);
         xAxis.setEnabled(true);
         xAxis.setGranularity(50f);
@@ -348,7 +350,7 @@ public class CurrencyDetailFragment extends Fragment {
 
         YAxis yAxis = priceGraph.getAxisLeft();
         yAxis.setDrawGridLines(false);
-        yAxis.setTextColor(getResources().getColor(R.color.card_text));
+        yAxis.setTextColor(getResources().getColor(R.color.card_text, null));
         yAxis.setDrawAxisLine(false);
         yAxis.setEnabled(false);
 
@@ -369,7 +371,7 @@ public class CurrencyDetailFragment extends Fragment {
         }
     }
 
-    private void setGlobalGraphProperties() {
+    public void setGlobalGraphProperties() {
         priceGraph.setNoDataText("");
         priceGraph.setEnabled(false);
         priceGraph.setDrawGridBackground(false);
@@ -386,7 +388,7 @@ public class CurrencyDetailFragment extends Fragment {
         setPriceGraphListeners();
     }
 
-    private void setPriceGraphListeners() {
+    public void setPriceGraphListeners() {
         priceGraph.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(Entry e, Highlight h) {
@@ -451,7 +453,7 @@ public class CurrencyDetailFragment extends Fragment {
         });
     }
 
-    private void getHourChartData() {
+    public void getHourChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histohour?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
             @Override
@@ -469,7 +471,9 @@ public class CurrencyDetailFragment extends Fragment {
                             continue;
                         hourChartData.add(new Entry(time, value));
                     }
-                }catch (JSONException e){}
+                }catch (JSONException e){
+                    //
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -480,7 +484,7 @@ public class CurrencyDetailFragment extends Fragment {
         requestQueue.add(stringRequest);
     }
 
-    private void getDayChartData() {
+    public void getDayChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histoday?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
             @Override
@@ -498,7 +502,9 @@ public class CurrencyDetailFragment extends Fragment {
                             continue;
                         dayChartData.add(new Entry(time, value));
                     }
-                }catch (JSONException e){}
+                }catch (JSONException e){
+                    //
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -530,7 +536,9 @@ public class CurrencyDetailFragment extends Fragment {
                     }
                     chartProgress.setVisibility(View.INVISIBLE);
                     minuteData.callOnClick();
-                }catch (JSONException e){}
+                }catch (JSONException e){
+                    //
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -576,7 +584,9 @@ public class CurrencyDetailFragment extends Fragment {
                             priceLow.setText("--");
                         }
                     }
-                }catch (JSONException e){}
+                }catch (JSONException e){
+                    //
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -624,7 +634,9 @@ public class CurrencyDetailFragment extends Fragment {
                         if(aboutText.getText() == null){
                             aboutCardView.setVisibility(View.INVISIBLE);
                         }
-                    } catch (Exception e){}
+                    } catch (Exception e){
+                        //
+                    }
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -633,7 +645,9 @@ public class CurrencyDetailFragment extends Fragment {
                 }
             });
             requestQueue.add(stringRequest);
-        } catch(Exception e){}
+        } catch(Exception e){
+            //
+        }
 
     }
 
@@ -655,29 +669,31 @@ public class CurrencyDetailFragment extends Fragment {
             @Override
             public void onResponse(String response) {
                 try {
-                    String s;
                     JSONObject json = new JSONObject(response);
                     JSONObject jsonObject = json.getJSONObject(currencyInfo.getSymbol());
                     DecimalFormat decimalFormat = new DecimalFormat("#,###");
-                    if(jsonObject.getString("reddit_volume_24h") != null){
-                        int val = Integer.parseInt(jsonObject.getString("reddit_volume_24h"));
-                        redditSocialActivity.setText(decimalFormat.format(val));
-                        redditSocialActivity.setTextColor(getResources().getColor(R.color.white,null));
-                    } else {
-                        redditSocialActivity.setText("--");
-                        redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
-                    }
-                    if(jsonObject.getString("twitter_volume_24h") != null){
-                        int val = Integer.parseInt(jsonObject.getString("twitter_volume_24h"));
-                        twitterSocialActivity.setText(decimalFormat.format(val));
-                        twitterSocialActivity.setTextColor(getResources().getColor(R.color.white,null));
+                    if(isAdded()) {
+                        if (jsonObject.getString("reddit_volume_24h") != null) {
+                            int val = Integer.parseInt(jsonObject.getString("reddit_volume_24h"));
+                            redditSocialActivity.setText(decimalFormat.format(val));
+                            redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                        } else {
+                            redditSocialActivity.setText("--");
+                            redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                        }
+                        if (jsonObject.getString("twitter_volume_24h") != null) {
+                            int val = Integer.parseInt(jsonObject.getString("twitter_volume_24h"));
+                            twitterSocialActivity.setText(decimalFormat.format(val));
+                            twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
 
-                    } else {
-                        twitterSocialActivity.setText("--");
-                        twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                        } else {
+                            twitterSocialActivity.setText("--");
+                            twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                        }
                     }
-
-                }catch (JSONException e){}
+                }catch (JSONException e){
+                    //
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -692,39 +708,40 @@ public class CurrencyDetailFragment extends Fragment {
 
     //Util
 
-    private String convertToDateAndTime(float f){
+    public String convertToDateAndTime(float f){
         Date date = new Date(((long)f)*1000L);
         SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy H:mm", Locale.US);
         return sdf.format(date);
     }
 
-    private void parseDate() {
+    public void parseDate() {
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US);
             Date date = format.parse(currencyInfo.getTimeStamp());
             SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US);
             timestamp.setText(sdf.format(date));
-        }catch(Exception e){}
+        }catch(Exception e){
+            //
+        }
     }
 
-    private void getPriceData() {
+    public void getPriceData() {
         requestQueue.add(getStringRequest().setRetryPolicy(new DefaultRetryPolicy(0,0,0f)));
     }
 
-    private StringRequest getStringRequest() {
+    public StringRequest getStringRequest() {
         return new StringRequest(Request.Method.GET, priceRequestURL, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
-                    Log.d("RESPONSE", "onResponse: " + response);
                     updateCurrencyData(response);
                 }catch (JSONException e){
+                    //
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("ERROR", "onErrorResponse: " + error.getMessage());
             }
         });
     }
@@ -742,18 +759,15 @@ public class CurrencyDetailFragment extends Fragment {
         currencyInfo.setTimeStamp(result.getString("TimeStamp"));
         currencyInfo.setOpenBuyOrders(result.getInt("OpenBuyOrders"));
         currencyInfo.setOpenSellOrders(result.getInt("OpenSellOrders"));
-        updateViews();
+        if(isAdded()) {
+            updateViews();
+        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            requestQueue = Volley.newRequestQueue(getActivity());
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnNewsFragmentItemSelectedListener");
-        }
+        requestQueue = Volley.newRequestQueue(getActivity());
     }
 
     @Override
@@ -781,10 +795,10 @@ public class CurrencyDetailFragment extends Fragment {
             String label = currencyInfo.getName() + " (" + currencyInfo.getSymbol() + ")";
             currencyLabel.setText(label);
             updateViews();
-            if(currencyInfo.getName().equalsIgnoreCase("bitcoin")){
+            if(currencyInfo.getSymbol().equalsIgnoreCase("bitcoin")){
                 priceRequestURL = baseURL + "USDT-" + currencyInfo.getSymbol();
             } else {
-                priceRequestURL = baseURL + "BTC-" + currencyInfo.getSymbol();
+                priceRequestURL = baseURL + "BTC-" + (currencyInfo.getSymbol().equalsIgnoreCase("BCH") ? "BCC" : currencyInfo.getSymbol());
             }
 
             setGlobalGraphProperties();
@@ -805,17 +819,19 @@ public class CurrencyDetailFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    String s = snapshot.getValue().toString() + "%";
-                    switch (snapshot.getKey()){
-                        case "positive":
-                            happySentiment.setText(s);
-                            break;
-                        case "negative":
-                            sadSentiment.setText(s);
-                            break;
-                        case "neutral":
-                            neutralSentiment.setText(s);
-                            break;
+                    if(snapshot.getValue() != null) {
+                        String s = snapshot.getValue().toString() + "%";
+                        switch (snapshot.getKey()){
+                            case "positive":
+                                happySentiment.setText(s);
+                                break;
+                            case "negative":
+                                sadSentiment.setText(s);
+                                break;
+                            case "neutral":
+                                neutralSentiment.setText(s);
+                                break;
+                        }
                     }
                 }
             }
@@ -828,6 +844,11 @@ public class CurrencyDetailFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         terminate();
@@ -836,8 +857,4 @@ public class CurrencyDetailFragment extends Fragment {
         dayChartData.clear();
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 }

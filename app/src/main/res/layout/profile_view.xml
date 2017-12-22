@@ -3,16 +3,10 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:gravity="center">
+    android:gravity="bottom"
+    android:paddingBottom="10dp">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@color/card_color"
-        android:textColor="@color/white"
-        android:text="@string/feedback"
-        android:id="@+id/suggestion"/>
+
 
     <Button
         android:layout_width="match_parent"

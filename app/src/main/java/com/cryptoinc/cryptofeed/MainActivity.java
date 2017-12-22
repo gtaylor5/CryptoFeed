@@ -1,7 +1,6 @@
 package com.cryptoinc.cryptofeed;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,8 +17,9 @@ import com.google.android.gms.ads.AdView;
 
 import Utilities.CurrencyInfo;
 import Utilities.NewsInfo;
+import Utilities.RequestSingleton;
 
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener, CurrencyDetailFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener{
 
     AdView mAdView;
     AHBottomNavigation bottomNavigation;
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
     // Initialize Views
 
-    private void setNavBar() {
+    public void setNavBar() {
 
         progressBar = findViewById(R.id.progress_home);
 
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         if (fragment == null) {
                             showFragment(new ProfileFragment());
                         } else if (fragment.isVisible()) {
-                            // do nothing
+                            //
                         } else {
                             showFragment(fragment);
                         }
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         bottomNavigation.setCurrentItem(1);
     }
 
-    private void setAdView() {
+    public void setAdView() {
         mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -120,25 +120,28 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         ft.commit();
     }
 
-    protected void backstackFragment() {
+    public void backstackFragment() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
             finish();
         }
-        getSupportFragmentManager().popBackStackImmediate();
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
-        if(currentFragment != null){
-            if(currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment")||currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")){
-                bottomNavigation.enableItemAtPosition(1);
-                bottomNavigation.setCurrentItem(1, false);
-            } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")){
-                bottomNavigation.enableItemAtPosition(2);
-            } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("ProfileFragment")) {
-
+        try {
+            getSupportFragmentManager().popBackStackImmediate();
+        } catch (Exception e) {
+            //
+        } finally {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
+            if (currentFragment != null) {
+                if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment") || currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
+                    bottomNavigation.enableItemAtPosition(1);
+                    bottomNavigation.setCurrentItem(1, false);
+                } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
+                    bottomNavigation.enableItemAtPosition(2);
+                }
             }
         }
     }
 
-    protected void clearBackStackAfterLogout() {
+    public void clearBackStackAfterLogout() {
         FragmentManager fm = getSupportFragmentManager();
         for(int i = 0; i < fm.getBackStackEntryCount(); i++){
             fm.popBackStackImmediate();
@@ -154,7 +157,9 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         View v = getCurrentFocus();
         if(v != null) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+            if(imm != null) {
+                imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+            }
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(CurrencyDetailFragment.class.getSimpleName());
@@ -178,14 +183,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     @Override
     public void onBackPressed() {
         if(getSupportFragmentManager().getBackStackEntryCount() > 0){
+            RequestSingleton.getInstance(this).getRequestQueue().cancelAll("");
             backstackFragment();
         } else {
             super.onBackPressed();
         }
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
 }

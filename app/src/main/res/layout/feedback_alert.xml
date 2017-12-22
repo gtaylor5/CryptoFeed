@@ -15,7 +15,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@android:color/transparent">
             <TextView
                 android:id="@+id/alertHeading"
                 android:layout_width="wrap_content"
@@ -24,6 +25,7 @@
                 android:textColor="@color/white"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
+                android:textAlignment="center"
                 style="@style/Base.TextAppearance.AppCompat.Medium"/>
 
             <EditText
@@ -34,9 +36,11 @@
                 android:layout_height="wrap_content"
                 android:minLines="5"
                 android:maxLines="10"
-                android:backgroundTint="@android:color/transparent"
+                android:backgroundTint="@color/white"
                 android:layout_margin="10dp"
-                android:textColor="@color/white"
+                android:textColor="@color/negative_red"
+                android:hint="What do you think of CryptoFees?"
+                android:textColorHint="@color/heading_color"
                 android:gravity="top|start"/>
 
             <Button

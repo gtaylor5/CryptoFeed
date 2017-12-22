@@ -4,6 +4,7 @@ package Utilities; /**
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 public class CurrencyInfo implements Parcelable, Comparable<CurrencyInfo>{
 
@@ -30,25 +31,6 @@ public class CurrencyInfo implements Parcelable, Comparable<CurrencyInfo>{
 
     public CurrencyInfo (){}
 
-    public CurrencyInfo(double ask, double baseVolume, double bid, String created,
-                        double high, double last, double low, String name,
-                        int openBuyOrders, int openSellOrders, double prevDay,
-                        String timeStamp, double volume, String symbol) {
-        Ask = ask;
-        BaseVolume = baseVolume;
-        Bid = bid;
-        Created = created;
-        High = high;
-        Last = last;
-        Low = low;
-        Name = name;
-        OpenBuyOrders = openBuyOrders;
-        OpenSellOrders = openSellOrders;
-        PrevDay = prevDay;
-        TimeStamp = timeStamp;
-        Volume = volume;
-        Symbol = symbol;
-    }
 
     public double getAsk() {
         return Ask;
@@ -283,7 +265,6 @@ public class CurrencyInfo implements Parcelable, Comparable<CurrencyInfo>{
             return new CurrencyInfo[size];
         }
     };
-
 
     @Override
     public int compareTo(CurrencyInfo o) {

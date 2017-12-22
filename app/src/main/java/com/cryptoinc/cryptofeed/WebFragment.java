@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 
 import Utilities.NewsInfo;
 
@@ -17,7 +16,7 @@ public class WebFragment extends Fragment {
 
     NewsInfo info;
     View view;
-    private WebView webView;
+    public WebView webView;
 
     public WebFragment() {
         // Required empty public constructor

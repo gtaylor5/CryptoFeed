@@ -31,17 +31,17 @@ import Utilities.NewsInfoAdapter;
 
 public class NewsFragment extends Fragment {
 
-    private String coinDeskNewsURL = "https://www.coindesk.com/feed/";
-    private String coinTelegraphNewURL = "https://cointelegraph.com/rss";
-    private String bitcoinNewsURL = "https://news.bitcoin.com/feed/";
+    public String coinDeskNewsURL = "https://www.coindesk.com/feed/";
+    //private String coinTelegraphNewURL = "https://cointelegraph.com/rss";
+    public String bitcoinNewsURL = "https://news.bitcoin.com/feed/";
 
-    private OnNewsFragmentItemSelectedListener mListener;
-    private View view;
+    public OnNewsFragmentItemSelectedListener mListener;
+    public View view;
     RecyclerView recyclerView;
     NewsInfoAdapter newsInfoAdapter;
     LinearLayoutManager manager;
     ArrayList<NewsInfo> newsList = new ArrayList<>();
-    private RequestQueue queue;
+    public RequestQueue queue;
 
     volatile int numberReturned = 0;
 
@@ -122,7 +122,7 @@ public class NewsFragment extends Fragment {
         });
     }
 
-    private ArrayList<NewsInfo> readFeed(XmlPullParser parser, String source) throws XmlPullParserException, IOException, ParseException{
+    public ArrayList<NewsInfo> readFeed(XmlPullParser parser, String source) throws XmlPullParserException, IOException, ParseException{
         ArrayList<NewsInfo> list = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "channel");
         while(parser.next() != XmlPullParser.END_TAG){
@@ -140,7 +140,7 @@ public class NewsFragment extends Fragment {
     }
 
 
-    private NewsInfo readItem(XmlPullParser parser, String source) {
+    public NewsInfo readItem(XmlPullParser parser, String source) {
         NewsInfo info = new NewsInfo();
         info.setSource(source);
         try {
@@ -149,23 +149,27 @@ public class NewsFragment extends Fragment {
                     continue;
                 }
                 String name = parser.getName();
-                if(name.equals("title")){
-                    info.setTitle(readText(parser));
-                } else if(name.equals("link")){
-                    info.setLink(readText(parser));
-                } else if(name.equals("pubDate")){
-                    info.setPubDate(readText(parser));
-                } else if(name.equals("description")){
-                    info.setDescription(readText(parser));
-                } else {
-                    skip(parser);
+                if(name != null) {
+                    if (name.equals("title")) {
+                        info.setTitle(readText(parser));
+                    } else if (name.equals("link")) {
+                        info.setLink(readText(parser));
+                    } else if (name.equals("pubDate")) {
+                        info.setPubDate(readText(parser));
+                    } else if (name.equals("description")) {
+                        info.setDescription(readText(parser));
+                    } else {
+                        skip(parser);
+                    }
                 }
             }
-        } catch (Exception e){}
+        } catch (Exception e){
+            //
+        }
         return info;
     }
 
-    private void skip(XmlPullParser parser)  throws XmlPullParserException, IOException {
+    public void skip(XmlPullParser parser)  throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalStateException();
         }
@@ -182,7 +186,7 @@ public class NewsFragment extends Fragment {
         }
     }
 
-    private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
+    public String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
         String result = null;
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.getText();
@@ -202,7 +206,7 @@ public class NewsFragment extends Fragment {
             @Override
             public void run() {
                 while(numberReturned < 2){
-
+                    //
                 }
                 (getActivity()).runOnUiThread(new Runnable() {
                     @Override

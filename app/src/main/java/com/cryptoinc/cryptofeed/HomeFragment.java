@@ -28,11 +28,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import org.json.JSONArray;
@@ -42,7 +37,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import Utilities.CurrencyInfo;
@@ -63,14 +57,10 @@ public class HomeFragment extends Fragment {
     LinearLayoutManager manager;
     View view;
 
-    //Firebase
-
-    DatabaseReference reference;
 
     // Currency Related Data
 
     HashMap<String, String> currencySymbolMap = new HashMap<>();
-    HashSet<String> favorites = new HashSet<>();
     volatile ArrayList<CurrencyInfo> currencies = new ArrayList<>();
     int sortType = 1;
     boolean favoritesChecked = false;
@@ -120,7 +110,7 @@ public class HomeFragment extends Fragment {
     public void setViews(final LayoutInflater inflater, final ViewGroup container) {
         view = inflater.inflate(R.layout.fragment_home, container, false);
         recyclerView = view.findViewById(R.id.currencyList);
-        adapter = new CurrencyInfoAdapter(inflater, currencies);
+        adapter = new CurrencyInfoAdapter(inflater, currencies, ((MainActivity)getActivity()).favorites);
         recyclerView.setAdapter(adapter);
         manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayout.VERTICAL);
@@ -131,6 +121,7 @@ public class HomeFragment extends Fragment {
                 mListener.onHomeFragmentItemSelected(info);
             }
         });
+        adapter.favorites.addAll(((MainActivity)getActivity()).favorites);
         setSearchBar(inflater, container);
     }
 
@@ -191,7 +182,7 @@ public class HomeFragment extends Fragment {
                         if(!item.isChecked()) {
                             item.setChecked(true);
                             favoritesChecked = true;
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            FirebaseUser user = ((MainActivity)getActivity()).currentUser;
                             if (user == null) {
                                 showPopUpWindow(inflater, container);
                                 item.setChecked(false);
@@ -264,6 +255,8 @@ public class HomeFragment extends Fragment {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(FirebaseAuth.getInstance().getCurrentUser() != null){
                         Toast.makeText(getActivity(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                        ((MainActivity)getActivity()).initializeFirebaseDB();
                         popupWindow.dismiss();
                     }
                 }
@@ -275,6 +268,8 @@ public class HomeFragment extends Fragment {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(FirebaseAuth.getInstance().getCurrentUser() != null){
                                 Toast.makeText(getActivity(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                                ((MainActivity)getActivity()).initializeFirebaseDB();
                                 popupWindow.dismiss();
                             }
                         }
@@ -288,33 +283,17 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void getFavorites(final boolean favoritesClicked) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    public void getFavorites() {
+        FirebaseUser user = ((MainActivity)getActivity()).currentUser;
         if(user != null) {
-            reference = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("favorites");
-            reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    favorites.clear();
-                    if (favoritesClicked && dataSnapshot.getChildrenCount() == 0) {
-                        Toast.makeText(getActivity(), "You do not currently have any fravorites.", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        if (snapshot.getValue() != null) {
-                            favorites.add(snapshot.getValue().toString());
-                        }
-                    }
-                    adapter.favorites.addAll(favorites);
-                    adapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+            if (((MainActivity)getActivity()).favorites.size() == 0) {
+                Toast.makeText(getActivity(), "You do not currently have any fravorites.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            adapter.favorites = (((MainActivity)getActivity()).favorites);
+            adapter.notifyDataSetChanged();
         }
+
     }
 
     void filter(String text){
@@ -326,16 +305,6 @@ public class HomeFragment extends Fragment {
 
         }
         adapter.updateList(temp);
-    }
-
-    public void initializeFirebaseDB() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user == null){
-            return;
-        }
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        reference = database.getReference("users").child(user.getUid()).child("favorites");
-        getFavorites(false);
     }
 
     //Currency Data Requests / Parsing
@@ -389,15 +358,15 @@ public class HomeFragment extends Fragment {
                 JSONObject jsonObject = array.getJSONObject(i);
                 if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("ETH")){
                     if(jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BTC")){
-                        if(!favoritesChecked || favorites.contains(jsonObject.getString("MarketName").split("-")[1])){
+                        if(!favoritesChecked || ((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])){
                             currencies.add(setCurrencyInfo(jsonObject));
                         }
                         BTC_USD = jsonObject.getDouble("Last");
                     }
                     if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("USDT")){
                         if(favoritesChecked){
-                            if(favorites.contains(jsonObject.getString("MarketName").split("-")[1])
-                                    ||(favorites.contains("BCH") && jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC"))){
+                            if(((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])
+                                    ||(((MainActivity)getActivity()).favorites.contains("BCH") && jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC"))){
                                 currencies.add(setCurrencyInfo(jsonObject));
                             }
                         } else {
@@ -426,9 +395,8 @@ public class HomeFragment extends Fragment {
                     Collections.sort(currencies, Sort.sortPercentHighToLow);
             }
             if(favoritesChecked){
-                if (reference != null) {
-                    getFavorites(true);
-                } else {
+                if (((MainActivity)getActivity()).favoritesRef != null) {
+                    getFavorites();
                     adapter.notifyDataSetChanged();
                 }
             }else{
@@ -474,7 +442,6 @@ public class HomeFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnHomeFragmentListener) {
             mListener = (OnHomeFragmentListener) context;
-            initializeFirebaseDB();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnNewsFragmentItemSelectedListener");

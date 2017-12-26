@@ -2,6 +2,7 @@
     <string name="app_name">CryptoFeed</string>
     <string name="banner_ad_unit_id">ca-app-pub-3404074879352583/8259285786</string>
     <string name="interstitial">ca-app-pub-3404074879352583/9911783389</string>
+    <string name="video">ca-app-pub-3404074879352583/7187645567</string>
     <string name="price_open">Price (Close): </string>
     <string name="price_low">Price (Low): </string>
     <string name="price_high">Price (High): </string>

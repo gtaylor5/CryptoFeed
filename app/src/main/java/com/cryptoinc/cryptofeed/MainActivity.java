@@ -60,6 +60,15 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setNavBar();
+        initializeAds();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser != null) {
+            initializeFirebaseDB();
+            getFavorites();
+        }
+    }
+
+    private void initializeAds() {
         MobileAds.initialize(this, "ca-app-pub-3404074879352583/7187645567");
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId(getResources().getString(R.string.interstitial));
@@ -104,11 +113,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
             }
         });
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(currentUser != null) {
-            initializeFirebaseDB();
-            getFavorites();
-        }
     }
 
     public void initializeFirebaseDB() {

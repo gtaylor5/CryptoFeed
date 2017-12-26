@@ -23,6 +23,9 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -129,7 +132,7 @@ public class ProfileFragment extends Fragment {
 
         removeAds.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
                 dialog.setTitle("Remove Ads");
                 dialog.setMessage("Would you like to watch a short video to remove ads for 24 hours?");
@@ -145,6 +148,8 @@ public class ProfileFragment extends Fragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if(((MainActivity)getActivity()).mRewardVideoAd.isLoaded()) {
                             ((MainActivity)getActivity()).mRewardVideoAd.show();
+                        } else {
+                            Toast.makeText(view.getContext(), "There was an error loading the ad. Please try again later.", Toast.LENGTH_LONG).show();
                         }
                         dialog.dismiss();
                     }

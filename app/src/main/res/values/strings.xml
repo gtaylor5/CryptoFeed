@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CryptoFeed</string>
     <string name="banner_ad_unit_id">ca-app-pub-3404074879352583/8259285786</string>
+    <string name="interstitial">ca-app-pub-3404074879352583/9911783389</string>
     <string name="price_open">Price (Close): </string>
     <string name="price_low">Price (Low): </string>
     <string name="price_high">Price (High): </string>
@@ -53,4 +54,5 @@
     <string name="ETH_Address">0xF8D182dA0aD3365715D6D8FF94fFD70C59543547</string>
     <string name="btc">BTC</string>
     <string name="btc_address">1CKwRMbrp8dthrRkSepmqHRDULC8yPwQ3y</string>
+    <string name="remove_ads_for_24hrs">Remove Ads for 24Hrs</string>
 </resources>

@@ -1,13 +1,14 @@
 package Utilities;
 
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
@@ -41,9 +42,10 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
     public HashSet<String> favorites = new HashSet<>();
     private LayoutInflater layoutInflater;
     private ViewGroup container;
-    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies){
+    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites){
         this.layoutInflater = layoutInflater;
         this.currencies = currencies;
+        this.favorites = favorites;
     }
 
     public void showPopUpWindow(LayoutInflater inflater, ViewGroup container) {
@@ -72,6 +74,10 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+                }
                 authenticateNewUser(popupWindow, email, password);
             }
         });
@@ -108,7 +114,6 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
 
         }
     }
-
 
     @Override
     public CurrencyInfoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
@@ -38,6 +39,7 @@ public class ProfileFragment extends Fragment {
 
     Button donate;
     Button logout;
+    Button removeAds;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -67,7 +69,7 @@ public class ProfileFragment extends Fragment {
     public void showUserLoggedInView() {
         donate = view.findViewById(R.id.donate);
         logout = view.findViewById(R.id.logout);
-
+        removeAds = view.findViewById(R.id.removeAds);
         donate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,10 +117,39 @@ public class ProfileFragment extends Fragment {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(user != null){
+                if(((MainActivity)getActivity()).currentUser != null){
+                    ((MainActivity)getActivity()).favoritesRef = null;
+                    ((MainActivity)getActivity()).currentUser = null;
+                    ((MainActivity)getActivity()).favorites.clear();
                     FirebaseAuth.getInstance().signOut();
                     ((MainActivity)getActivity()).clearBackStackAfterLogout();
                 }
+            }
+        });
+
+        removeAds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
+                dialog.setTitle("Remove Ads");
+                dialog.setMessage("Would you like to watch a short video to remove ads for 24 hours?");
+                dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No, Thanks.", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if(((MainActivity)getActivity()).mRewardVideoAd.isLoaded()) {
+                            ((MainActivity)getActivity()).mRewardVideoAd.show();
+                        }
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
         });
     }
@@ -148,6 +179,10 @@ public class ProfileFragment extends Fragment {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+                }
                 authenticateNewUser(email, password);
             }
         });
@@ -182,6 +217,7 @@ public class ProfileFragment extends Fragment {
                     if(FirebaseAuth.getInstance().getCurrentUser() != null){
                         Toast.makeText(getActivity(), "Sign In Successful!", Toast.LENGTH_LONG).show();
                         view = inflater.inflate(R.layout.profile_view, container, false);
+                        setCurrentUser();
                         ((MainActivity)getActivity()).bottomNavigation.setCurrentItem(1, false);
                         getActivity().getSupportFragmentManager().popBackStackImmediate();
                     }
@@ -198,6 +234,7 @@ public class ProfileFragment extends Fragment {
                             if(FirebaseAuth.getInstance().getCurrentUser() != null){
                                 Toast.makeText(getActivity(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
                                 view = inflater.inflate(R.layout.profile_view, container, false);
+                                setCurrentUser();
                                 ((MainActivity)getActivity()).bottomNavigation.setCurrentItem(1, false);
                                 getActivity().getSupportFragmentManager().popBackStackImmediate();
                             }
@@ -209,8 +246,13 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getActivity(), "Invalid Email Address. Please try again.", Toast.LENGTH_LONG).show();
         } else if (password.getText().toString().length() == 0){
             Toast.makeText(getActivity(), "You must enter a pasaword.", Toast.LENGTH_LONG).show();
-
         }
+    }
+
+    private void setCurrentUser() {
+        ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        ((MainActivity)getActivity()).initializeFirebaseDB();
+        ((MainActivity)getActivity()).getFavorites();
     }
 
     //Life cycle methods.

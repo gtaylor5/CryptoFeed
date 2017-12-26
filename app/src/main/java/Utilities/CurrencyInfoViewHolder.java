@@ -16,7 +16,6 @@ import com.google.firebase.storage.StorageReference;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Gerard on 11/10/2017.

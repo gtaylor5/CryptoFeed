@@ -37,13 +37,18 @@ public class WebFragment extends Fragment {
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
                     super.onPageStarted(view, url, favicon);
-                    ((MainActivity)getActivity()).progressBar.setVisibility(View.VISIBLE);
+                    if(isAdded()) {
+                        ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                    if(isAdded()) {
+                        ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             });
         }

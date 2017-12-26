@@ -15,8 +15,8 @@ import java.util.ArrayList;
 
 public class NewsInfoAdapter extends RecyclerView.Adapter<NewsInfoViewHolder> {
 
-    private ArrayList<NewsInfo> newsList;
-    private LayoutInflater layoutInflater;
+    public ArrayList<NewsInfo> newsList;
+    public LayoutInflater layoutInflater;
 
     public NewsInfoAdapter(LayoutInflater layoutInflater, ArrayList<NewsInfo> newsList) {
         this.layoutInflater = layoutInflater;

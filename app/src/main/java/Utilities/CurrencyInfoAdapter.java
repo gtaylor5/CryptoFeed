@@ -1,14 +1,25 @@
 package Utilities;
 
-import android.app.Dialog;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cryptoinc.cryptofeed.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,17 +38,87 @@ import java.util.List;
 
 public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHolder> {
 
-    private ArrayList<CurrencyInfo> currencies;
+     ArrayList<CurrencyInfo> currencies;
     public HashSet<String> favorites = new HashSet<>();
     private LayoutInflater layoutInflater;
-    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies){
+    private ViewGroup container;
+    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites){
         this.layoutInflater = layoutInflater;
         this.currencies = currencies;
+        this.favorites = favorites;
+    }
+
+    public void showPopUpWindow(LayoutInflater inflater, ViewGroup container) {
+        final PopupWindow popupWindow;
+        View popUp = inflater.inflate(R.layout.sign_up_alert, container, false);
+        final EditText email = popUp.findViewById(R.id.email);
+        final EditText password = popUp.findViewById(R.id.password);
+        final Button login = popUp.findViewById(R.id.signUp);
+        final TextView switchView = popUp.findViewById(R.id.switchview);
+        final TextView heading = popUp.findViewById(R.id.alertHeading);
+        switchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (switchView.getText().toString().contains("Sign In")) {
+                    switchView.setText(R.string.newuser);
+                    heading.setText(R.string.please_sign_in_to_add_favorites);
+                } else {
+                    switchView.setText(R.string.already);
+                    heading.setText(R.string.please_sign_up_to_add_favorites);
+                }
+            }
+        });
+
+        popupWindow = new PopupWindow(popUp, container.getWidth(),container.getHeight(), true);
+        popupWindow.showAtLocation(popUp, Gravity.CENTER_VERTICAL, 0, 0);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
+                }
+                authenticateNewUser(popupWindow, email, password);
+            }
+        });
+    }
+
+    public void authenticateNewUser(final PopupWindow popupWindow, final EditText email, final EditText password) {
+        if(email.getText().toString().contains("@") && password.getText().toString().length() != 0){
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if(FirebaseAuth.getInstance().getCurrentUser() != null){
+                        Toast.makeText(container.getContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        popupWindow.dismiss();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(FirebaseAuth.getInstance().getCurrentUser() != null){
+                                Toast.makeText(container.getContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                popupWindow.dismiss();
+                            }
+                        }
+                    });
+                }
+            });
+        } else if (!email.getText().toString().contains("@")){
+            Toast.makeText(container.getContext(), "Invalid Email Address. Please try again.", Toast.LENGTH_LONG).show();
+        } else if (password.getText().toString().length() == 0){
+            Toast.makeText(container.getContext(), "You must enter a pasaword.", Toast.LENGTH_LONG).show();
+
+        }
     }
 
     @Override
     public CurrencyInfoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = layoutInflater.inflate(R.layout.currencyinfo, parent, false);
+        this.container = parent;
         return new CurrencyInfoViewHolder(view);
     }
 
@@ -57,18 +138,7 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
             public void onClick(View v) {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user == null){
-                    final Dialog alertDialog = new Dialog(v.getContext());
-                    alertDialog.setContentView(R.layout.sign_up_alert);
-                    final EditText email = (EditText) alertDialog.findViewById(R.id.email);
-                    final EditText password = (EditText)alertDialog.findViewById(R.id.password);
-                    final Button login = (Button)alertDialog.findViewById(R.id.signUp);
-                    login.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            holder.authenticateNewUser(alertDialog,email, password);
-                        }
-                    });
-                    alertDialog.show();
+                    showPopUpWindow(layoutInflater, container);
                 } else {
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
                     final DatabaseReference reference = database.getReference("users").child(user.getUid()).child("favorites");
@@ -76,13 +146,15 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                                if(((String)(snapshot.getValue())).equalsIgnoreCase(holder.currencySymbol.getText().toString())){
-                                    DatabaseReference ref = reference.child(snapshot.getKey());
-                                    favorites.remove(holder.currencySymbol.getText().toString());
-                                    ref.setValue(null);
-                                    holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
-                                    notifyDataSetChanged();
-                                    return;
+                                if(snapshot.getValue() != null) {
+                                    if (((String) (snapshot.getValue())).equalsIgnoreCase(holder.currencySymbol.getText().toString())) {
+                                        DatabaseReference ref = reference.child(snapshot.getKey());
+                                        favorites.remove(holder.currencySymbol.getText().toString());
+                                        ref.setValue(null);
+                                        holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
+                                        //notifyDataSetChanged();
+                                        return;
+                                    }
                                 }
                             }
                             reference.push().setValue(holder.currencySymbol.getText().toString());
@@ -106,7 +178,7 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
         return this.currencies.size();
     }
 
-    private CurrencyInfoListListener currencyInfoListListener;
+    public CurrencyInfoListListener currencyInfoListListener;
 
     public void setCurrencyInfoListListener(CurrencyInfoListListener currencyInfoListListener){
         this.currencyInfoListListener = currencyInfoListListener;

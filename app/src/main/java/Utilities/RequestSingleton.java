@@ -11,9 +11,9 @@ import com.android.volley.toolbox.Volley;
  */
 
 public class RequestSingleton {
-    private static RequestSingleton instance;
-    private RequestQueue requestQueue;
-    private static Context con;
+    public static RequestSingleton instance;
+    public RequestQueue requestQueue;
+    public static Context con;
 
     private RequestSingleton(Context context){
         con = context;

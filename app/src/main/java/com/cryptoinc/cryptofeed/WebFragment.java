@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 
 import Utilities.NewsInfo;
 
@@ -17,7 +16,7 @@ public class WebFragment extends Fragment {
 
     NewsInfo info;
     View view;
-    private WebView webView;
+    public WebView webView;
 
     public WebFragment() {
         // Required empty public constructor
@@ -38,13 +37,18 @@ public class WebFragment extends Fragment {
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
                     super.onPageStarted(view, url, favicon);
-                    ((MainActivity)getActivity()).progressBar.setVisibility(View.VISIBLE);
+                    if(isAdded()) {
+                        ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                    if(isAdded()) {
+                        ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                    }
+
                 }
             });
         }

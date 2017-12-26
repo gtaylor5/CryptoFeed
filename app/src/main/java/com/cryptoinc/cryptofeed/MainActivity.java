@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
@@ -13,7 +14,22 @@ import android.widget.ProgressBar;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashSet;
 
 import Utilities.CurrencyInfo;
 import Utilities.NewsInfo;
@@ -21,13 +37,22 @@ import Utilities.RequestSingleton;
 
 public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener{
 
-    AdView mAdView;
     AHBottomNavigation bottomNavigation;
     ProgressBar progressBar;
 
     CurrencyInfo currentCurrency;
     NewsInfo currentNews;
 
+    public int numberOfClicks = 1;
+    public long adTimeStamp = 0L;
+    public InterstitialAd mInterstitialAd;
+    public RewardedVideoAd mRewardVideoAd;
+
+    FirebaseUser currentUser;
+    DatabaseReference favoritesRef;
+    DatabaseReference adsRef;
+
+    HashSet<String> favorites = new HashSet<>();
 
 
     @Override
@@ -35,7 +60,146 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setNavBar();
-        setAdView();
+        MobileAds.initialize(this, "ca-app-pub-3404074879352583/7187645567");
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId(getResources().getString(R.string.interstitial));
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mRewardVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardVideoAd.loadAd("ca-app-pub-3404074879352583/7187645567", new AdRequest.Builder().build());
+        mRewardVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
+            @Override
+            public void onRewardedVideoAdLoaded() {
+
+            }
+
+            @Override
+            public void onRewardedVideoAdOpened() {
+
+            }
+
+            @Override
+            public void onRewardedVideoStarted() {
+
+            }
+
+            @Override
+            public void onRewardedVideoAdClosed() {
+
+            }
+
+            @Override
+            public void onRewarded(RewardItem rewardItem) {
+                long time = System.currentTimeMillis() + (24 * 60 * 60 * 1000);
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Ads").child(currentUser.getUid());
+                reference.child("time").setValue(time);
+            }
+
+            @Override
+            public void onRewardedVideoAdLeftApplication() {
+
+            }
+
+            @Override
+            public void onRewardedVideoAdFailedToLoad(int i) {
+
+            }
+        });
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(currentUser != null) {
+            initializeFirebaseDB();
+            getFavorites();
+        }
+    }
+
+    public void initializeFirebaseDB() {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        favoritesRef = database.getReference("users").child(currentUser.getUid()).child("favorites");
+        adsRef = database.getReference("Ads").child(currentUser.getUid());
+        adsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.getValue() != null) {
+                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
+                    Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.getValue() != null) {
+                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
+                    Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        favoritesRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.getValue() != null) {
+                    favorites.add(dataSnapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null) {
+                    favorites.remove(dataSnapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getFavorites() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            favoritesRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("favorites");
+            favoritesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    favorites.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        if (snapshot.getValue() != null) {
+                            favorites.add(snapshot.getValue().toString());
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     // Initialize Views
@@ -104,12 +268,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         bottomNavigation.setCurrentItem(1);
     }
 
-    public void setAdView() {
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-    }
-
     // Fragment Managment
 
     public void showFragment(Fragment fragment){
@@ -168,6 +326,18 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         } else {
             showFragment(fragment);
         }
+        if(adTimeStamp < System.currentTimeMillis()) {
+            showAd();
+        }
+    }
+
+    private void showAd() {
+        if (numberOfClicks % 5 == 0){
+            if(mInterstitialAd.isLoaded()){
+                mInterstitialAd.show();
+            }
+        }
+        numberOfClicks++;
     }
 
     @Override
@@ -177,6 +347,9 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         Fragment fragment = fragmentManager.findFragmentByTag(WebFragment.class.getSimpleName());
         if(fragment == null){
             showFragment(new WebFragment());
+        }
+        if(adTimeStamp < System.currentTimeMillis()) {
+            showAd();
         }
     }
 

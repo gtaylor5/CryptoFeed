@@ -330,6 +330,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         } else {
             showFragment(fragment);
         }
+        numberOfClicks++;
         if(adTimeStamp < System.currentTimeMillis()) {
             showAd();
         }
@@ -341,7 +342,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                 mInterstitialAd.show();
             }
         }
-        numberOfClicks++;
     }
 
     @Override
@@ -352,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         if(fragment == null){
             showFragment(new WebFragment());
         }
+        numberOfClicks++;
         if(adTimeStamp < System.currentTimeMillis()) {
             showAd();
         }

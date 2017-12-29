@@ -283,41 +283,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     // Fragment Managment
 
     public void showFragment(Fragment fragment){
-        if(findViewById(R.id.fragmentContainer2) == null) {
-            String tag = fragment.getClass().getSimpleName();
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.fragmentContainer1, fragment, tag);
-            ft.addToBackStack(null);
-            ft.commit();
-        } else {
-            String name = fragment.getClass().getSimpleName();
-            switch (name) {
-                case "CurrencyDetailFragment": {
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.fragmentContainer2, fragment, name);
-                    ft.commit();
-                    break;
-                }
-                case "NewsFragment": {
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.fragmentContainer1, fragment, name);
-                    ft.commit();
-                    break;
-                }
-                case "HomeFragment": {
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.fragmentContainer1, fragment, name);
-                    ft.commit();
-                    break;
-                }
-                case "WebFragment": {
-                    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.fragmentContainer2, fragment, name);
-                    ft.commit();
-                    break;
-                }
-            }
-        }
+        String tag = fragment.getClass().getSimpleName();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragmentContainer1, fragment, tag);
+        ft.addToBackStack(null);
+        ft.commit();
     }
 
     public void backstackFragment() {

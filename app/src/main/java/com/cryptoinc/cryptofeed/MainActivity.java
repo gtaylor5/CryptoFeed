@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
@@ -35,7 +36,7 @@ import Utilities.CurrencyInfo;
 import Utilities.NewsInfo;
 import Utilities.RequestSingleton;
 
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener {
 
     AHBottomNavigation bottomNavigation;
     ProgressBar progressBar;
@@ -69,12 +70,19 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     }
 
     private void initializeAds() {
-        MobileAds.initialize(this, "ca-app-pub-3404074879352583/7187645567");
+        MobileAds.initialize(this, "ca-app-pub-3404074879352583~7944780383");
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId(getResources().getString(R.string.interstitial));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                AdRequest adRequest = new AdRequest.Builder().build();
+                mInterstitialAd.loadAd(adRequest);
+            }
+        });
         mRewardVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardVideoAd.loadAd("ca-app-pub-3404074879352583/7187645567", new AdRequest.Builder().build());
+        mRewardVideoAd.loadAd(getString(R.string.rewardVideo), new AdRequest.Builder().build());
         mRewardVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
             @Override
             public void onRewardedVideoAdLoaded() {
@@ -93,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
             @Override
             public void onRewardedVideoAdClosed() {
-
+                mRewardVideoAd.loadAd(getString(R.string.rewardVideo), new AdRequest.Builder().build());
             }
 
             @Override
@@ -123,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if(dataSnapshot.getValue() != null) {
-                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
+                    //adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
                     Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
                 }
             }
@@ -131,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if(dataSnapshot.getValue() != null) {
-                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
+                    //adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
                     Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
                 }
             }
@@ -312,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     }
 
     //Override Methods
+    //Override Methods
 
     @Override
     public void onHomeFragmentItemSelected(CurrencyInfo currencyInfo) {
@@ -331,14 +340,12 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             showFragment(fragment);
         }
         numberOfClicks++;
-        if(adTimeStamp < System.currentTimeMillis()) {
-            showAd();
-        }
+        showAd();
     }
 
     private void showAd() {
-        if (numberOfClicks % 5 == 0){
-            if(mInterstitialAd.isLoaded()){
+        if(adTimeStamp <= System.currentTimeMillis()) {
+            if (numberOfClicks % 5 == 0) {
                 mInterstitialAd.show();
             }
         }
@@ -353,9 +360,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             showFragment(new WebFragment());
         }
         numberOfClicks++;
-        if(adTimeStamp < System.currentTimeMillis()) {
-            showAd();
-        }
+        showAd();
     }
 
     @Override

@@ -169,11 +169,12 @@ public class CurrencyDetailFragment extends Fragment {
         minuteData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
 
         chartProgress.setVisibility(View.VISIBLE);
-
-        getMinuteChartData();
-        getHourChartData();
-        getDayChartData();
-        getCoinSnapshot();
+        if(isAdded()) {
+            getMinuteChartData();
+            getHourChartData();
+            getDayChartData();
+            getCoinSnapshot();
+        }
     }
 
     public void initializeViews(View v) {

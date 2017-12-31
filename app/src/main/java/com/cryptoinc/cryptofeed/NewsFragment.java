@@ -211,8 +211,10 @@ public class NewsFragment extends Fragment {
                 (getActivity()).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((MainActivity)getActivity()).progressBar.setVisibility(View.INVISIBLE);
-                        newsInfoAdapter.notifyDataSetChanged();
+                        if(isAdded()) {
+                            ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                            newsInfoAdapter.notifyDataSetChanged();
+                        }
                     }
                 });
             }

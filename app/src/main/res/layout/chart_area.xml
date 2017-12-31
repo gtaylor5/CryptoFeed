@@ -78,7 +78,7 @@
                     android:layout_weight="1"
                     android:background="@color/card_color"
                     android:elevation="10dp"
-                    android:text="1m"
+                    android:text="Minute"
                     android:textColor="@color/white"
                     android:translationZ="5dp" />
 
@@ -89,7 +89,7 @@
                     android:layout_weight="1"
                     android:background="@color/card_color"
                     android:elevation="10dp"
-                    android:text="1h"
+                    android:text="Hour"
                     android:textColor="@color/white"
                     android:translationZ="5dp" />
 
@@ -100,7 +100,7 @@
                     android:layout_weight="1"
                     android:background="@color/card_color"
                     android:elevation="10dp"
-                    android:text="1d"
+                    android:text="Day"
                     android:textColor="@color/white"
                     android:translationZ="5dp" />
             </LinearLayout>

@@ -1,6 +1,8 @@
 package com.cryptoinc.cryptofeed;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,7 +19,6 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
@@ -29,6 +30,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 
 import java.util.HashSet;
 
@@ -59,7 +61,13 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        Configuration config = getResources().getConfiguration();
+        if(config.smallestScreenWidthDp >= 600) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            setContentView(R.layout.activity_main_large);
+        } else {
+            setContentView(R.layout.activity_main);
+        }
         setNavBar();
         initializeAds();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -283,29 +291,60 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     // Fragment Managment
 
     public void showFragment(Fragment fragment){
-        String tag = fragment.getClass().getSimpleName();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragmentContainer1, fragment, tag);
-        ft.addToBackStack(null);
-        ft.commit();
+        if(findViewById(R.id.activity_main) != null) {
+            String tag = fragment.getClass().getSimpleName();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragmentContainer1, fragment, tag);
+            ft.addToBackStack(null);
+            ft.commit();
+        } else {
+            String name = fragment.getClass().getSimpleName();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            if(name.equalsIgnoreCase("NewsFragment") || name.equalsIgnoreCase("HomeFragment") || name.equalsIgnoreCase("ProfileFragment")){
+                ft.replace(R.id.list_view, fragment);
+                ft.addToBackStack(null);
+            } else {
+                ft.replace(R.id.detailView, fragment);
+            }
+            ft.commit();
+        }
     }
 
     public void backstackFragment() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
             finish();
         }
-        try {
-            getSupportFragmentManager().popBackStackImmediate();
-        } catch (Exception e) {
-            //
-        } finally {
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
-            if (currentFragment != null) {
-                if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment") || currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
-                    bottomNavigation.enableItemAtPosition(1);
-                    bottomNavigation.setCurrentItem(1, false);
-                } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
-                    bottomNavigation.enableItemAtPosition(2);
+        if(findViewById(R.id.activity_main) != null) {
+            try {
+                getSupportFragmentManager().popBackStackImmediate();
+            } catch (Exception e) {
+                //
+            } finally {
+
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
+                if (currentFragment != null) {
+                    if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment") || currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
+                        bottomNavigation.enableItemAtPosition(1);
+                        bottomNavigation.setCurrentItem(1, false);
+                    } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
+                        bottomNavigation.enableItemAtPosition(2);
+                    }
+                }
+            }
+        } else {
+            try {
+                getSupportFragmentManager().popBackStackImmediate();
+            } catch (Exception e) {
+                //
+            } finally {
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.list_view);
+                if (currentFragment != null) {
+                    if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
+                        bottomNavigation.enableItemAtPosition(1);
+                        bottomNavigation.setCurrentItem(1, false);
+                    } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
+                        bottomNavigation.enableItemAtPosition(2);
+                    }
                 }
             }
         }

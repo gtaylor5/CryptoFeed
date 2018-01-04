@@ -361,7 +361,6 @@ public class HomeFragment extends Fragment {
                         if(!favoritesChecked || ((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])){
                             currencies.add(setCurrencyInfo(jsonObject));
                         }
-                        BTC_USD = jsonObject.getDouble("Last");
                     }
                     if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("USDT")){
                         if(favoritesChecked){
@@ -376,7 +375,7 @@ public class HomeFragment extends Fragment {
                 }
             }
             for(CurrencyInfo info : currencies){
-                info.setBTC_USD(BTC_USD);
+                info.setBTC_USD(((MainActivity)getActivity()).BTC_USD);
             }
             switch (sortType) {
                 case 1:

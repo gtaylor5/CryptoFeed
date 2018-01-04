@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,6 +56,7 @@ import java.util.Scanner;
 
 import Utilities.CurrencyInfo;
 import Utilities.DateFormatter;
+import Utilities.RequestSingleton;
 
 public class CurrencyDetailFragment extends Fragment {
 
@@ -109,7 +111,6 @@ public class CurrencyDetailFragment extends Fragment {
     CardView aboutCardView;
 
     NestedScrollView parentView;
-    RequestQueue requestQueue;
 
     ArrayList<Entry> minuteChartData = new ArrayList<Entry>();
     ArrayList<Entry> hourChartData = new ArrayList<Entry>();
@@ -482,7 +483,7 @@ public class CurrencyDetailFragment extends Fragment {
 
             }
         });
-        requestQueue.add(stringRequest);
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     public void getDayChartData() {
@@ -514,7 +515,7 @@ public class CurrencyDetailFragment extends Fragment {
             }
         });
 
-        requestQueue.add(stringRequest);
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     private void getMinuteChartData() {
@@ -547,7 +548,7 @@ public class CurrencyDetailFragment extends Fragment {
 
             }
         });
-        requestQueue.add(stringRequest);
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     public void getCoinSnapshot(){
@@ -595,7 +596,7 @@ public class CurrencyDetailFragment extends Fragment {
 
             }
         });
-        requestQueue.add(request);
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(request);
     }
 
     public void getFullCoinSnapshotById(){
@@ -645,7 +646,7 @@ public class CurrencyDetailFragment extends Fragment {
 
                 }
             });
-            requestQueue.add(stringRequest);
+            RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
         } catch(Exception e){
             //
         }
@@ -702,7 +703,7 @@ public class CurrencyDetailFragment extends Fragment {
 
             }
         });
-        requestQueue.add(request);
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(request);
     }
 
 
@@ -727,7 +728,7 @@ public class CurrencyDetailFragment extends Fragment {
     }
 
     public void getPriceData() {
-        requestQueue.add(getStringRequest().setRetryPolicy(new DefaultRetryPolicy(0,0,0f)));
+        RequestSingleton.getInstance(getActivity()).addToRequestQueue(getStringRequest());
     }
 
     public StringRequest getStringRequest() {
@@ -768,7 +769,6 @@ public class CurrencyDetailFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        requestQueue = Volley.newRequestQueue(getActivity());
     }
 
     @Override
@@ -853,9 +853,6 @@ public class CurrencyDetailFragment extends Fragment {
     public void onPause() {
         super.onPause();
         terminate();
-        minuteChartData.clear();
-        hourChartData.clear();
-        dayChartData.clear();
     }
 
 }

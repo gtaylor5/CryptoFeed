@@ -32,11 +32,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashSet;
 
 import Utilities.CurrencyInfo;
 import Utilities.NewsInfo;
 import Utilities.RequestSingleton;
+import Utilities.Requests;
 
 public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener {
 
@@ -57,6 +61,32 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
     HashSet<String> favorites = new HashSet<>();
 
+    double BTC_USD = 0;
+
+    Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            while(!Thread.currentThread().isInterrupted()) {
+                RequestSingleton.getInstance(getApplicationContext()).addToRequestQueue(Requests.getStringRequest("https://api.gdax.com/products/BTC-USD/ticker", new Requests.RequestFinishedListener() {
+                    @Override
+                    public void onRequestFinished(String response) {
+                        try {
+                            JSONObject btcUSD = new JSONObject(response);
+                            BTC_USD = btcUSD.getDouble("price");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }));
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             initializeFirebaseDB();
             getFavorites();
         }
+        new Thread(r).start();
     }
 
     private void initializeAds() {
@@ -190,6 +221,19 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        adsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!= null){
+                    adTimeStamp = (long) dataSnapshot.getValue();
+                }
             }
 
             @Override

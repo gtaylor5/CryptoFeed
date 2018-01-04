@@ -228,19 +228,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
             }
         });
-        adsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue()!= null){
-                    adTimeStamp = (long) dataSnapshot.getValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     public void getFavorites() {

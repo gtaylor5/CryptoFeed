@@ -61,32 +61,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
     HashSet<String> favorites = new HashSet<>();
 
-    double BTC_USD = 0;
-
-    Runnable r = new Runnable() {
-        @Override
-        public void run() {
-            while(!Thread.currentThread().isInterrupted()) {
-                RequestSingleton.getInstance(getApplicationContext()).addToRequestQueue(Requests.getStringRequest("https://api.gdax.com/products/BTC-USD/ticker", new Requests.RequestFinishedListener() {
-                    @Override
-                    public void onRequestFinished(String response) {
-                        try {
-                            JSONObject btcUSD = new JSONObject(response);
-                            BTC_USD = btcUSD.getDouble("price");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }));
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             initializeFirebaseDB();
             getFavorites();
         }
-        new Thread(r).start();
     }
 
     private void initializeAds() {
@@ -140,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
             @Override
             public void onRewardedVideoAdClosed() {
+
                 mRewardVideoAd.loadAd(getString(R.string.rewardVideo), new AdRequest.Builder().build());
             }
 
@@ -170,16 +144,14 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if(dataSnapshot.getValue() != null) {
-                    //adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
-                    Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
+                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
                 }
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if(dataSnapshot.getValue() != null) {
-                    //adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
-                    Log.d("AD TIMESTAMP", "onChildChanged: " + adTimeStamp);
+                    adTimeStamp = Long.parseLong(dataSnapshot.getValue().toString());
                 }
             }
 

@@ -208,15 +208,17 @@ public class NewsFragment extends Fragment {
                 while(numberReturned < 2){
                     //
                 }
-                (getActivity()).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(isAdded()) {
-                            ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
-                            newsInfoAdapter.notifyDataSetChanged();
+                if(getActivity() != null) {
+                    (getActivity()).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isAdded()) {
+                                ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                                newsInfoAdapter.notifyDataSetChanged();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }).start();
     }

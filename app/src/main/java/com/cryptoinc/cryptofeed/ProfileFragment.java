@@ -220,7 +220,9 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                        Toast.makeText(getActivity(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        if(getActivity() != null) {
+                            Toast.makeText(getActivity(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        }
                         view = inflater.inflate(R.layout.profile_view, container, false);
                         setCurrentUser();
                         ((MainActivity)getActivity()).bottomNavigation.setCurrentItem(1, false);

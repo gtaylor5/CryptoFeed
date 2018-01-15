@@ -25,14 +25,16 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import Utilities.NewsInfo;
 import Utilities.NewsInfoAdapter;
+import Utilities.RequestSingleton;
 
 public class NewsFragment extends Fragment {
 
     public String coinDeskNewsURL = "https://www.coindesk.com/feed/";
-    //private String coinTelegraphNewURL = "https://cointelegraph.com/rss";
+    public String coinTelegraphNewURL = "https://cointelegraph.com/rss";
     public String bitcoinNewsURL = "https://news.bitcoin.com/feed/";
 
     public OnNewsFragmentItemSelectedListener mListener;
@@ -122,6 +124,30 @@ public class NewsFragment extends Fragment {
         });
     }
 
+    public StringRequest getCoinTelegraphNews(){
+        return new StringRequest(Request.Method.GET, coinTelegraphNewURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    XmlPullParser parser = Xml.newPullParser();
+                    parser.setInput(new StringReader(response));
+                    parser.nextTag();
+                    parser.nextTag();
+                    String name = "CoinTelegraph.com";
+                    newsList.addAll(readFeed(parser, name));
+                    numberReturned++;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+    }
+
     public ArrayList<NewsInfo> readFeed(XmlPullParser parser, String source) throws XmlPullParserException, IOException, ParseException{
         ArrayList<NewsInfo> list = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "channel");
@@ -138,7 +164,6 @@ public class NewsFragment extends Fragment {
         }
         return list;
     }
-
 
     public NewsInfo readItem(XmlPullParser parser, String source) {
         NewsInfo info = new NewsInfo();
@@ -199,13 +224,15 @@ public class NewsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         numberReturned = 0;
+        newsList.clear();
         ((MainActivity)getActivity()).progressBar.setVisibility(View.VISIBLE);
         queue.add(getCoinDeskNews());
         queue.add(getBitcoinNews());
+        queue.add(getCoinTelegraphNews());
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(numberReturned < 2){
+                while(numberReturned < 3){
                     //
                 }
                 if(getActivity() != null) {
@@ -214,6 +241,7 @@ public class NewsFragment extends Fragment {
                         public void run() {
                             if (isAdded()) {
                                 ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
+                                Collections.sort(newsList);
                                 newsInfoAdapter.notifyDataSetChanged();
                             }
                         }
@@ -228,7 +256,7 @@ public class NewsFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnNewsFragmentItemSelectedListener) {
             mListener = (OnNewsFragmentItemSelectedListener) context;
-            queue = Volley.newRequestQueue(getActivity().getApplicationContext());
+            queue = RequestSingleton.getInstance(getActivity().getApplicationContext()).getRequestQueue();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnNewsFragmentItemSelectedListener");

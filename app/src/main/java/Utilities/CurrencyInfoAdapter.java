@@ -2,6 +2,7 @@ package Utilities;
 
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -19,6 +20,7 @@ import com.cryptoinc.cryptofeed.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,10 +44,12 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
     public HashSet<String> favorites = new HashSet<>();
     private LayoutInflater layoutInflater;
     private ViewGroup container;
+    private FirebaseAnalytics mFirebaseAnalytics;
     public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites){
         this.layoutInflater = layoutInflater;
         this.currencies = currencies;
         this.favorites = favorites;
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(layoutInflater.getContext());
     }
 
     public void showPopUpWindow(LayoutInflater inflater, ViewGroup container) {
@@ -129,6 +133,9 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
         holder.getV().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Bundle params = new Bundle();
+                params.putString("currency_name", currencyInfo.getName());
+                mFirebaseAnalytics.logEvent("currency_clicked", params);
                 currencyInfoListListener.currencySelected(currencyInfo);
             }
         });

@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,6 +57,8 @@ public class HomeFragment extends Fragment {
     MaterialSearchBar searchBar;
     LinearLayoutManager manager;
     View view;
+
+    FirebaseAnalytics mFirebaseAnalytics;
 
 
     // Currency Related Data
@@ -109,6 +112,7 @@ public class HomeFragment extends Fragment {
 
     public void setViews(final LayoutInflater inflater, final ViewGroup container) {
         view = inflater.inflate(R.layout.fragment_home, container, false);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         recyclerView = view.findViewById(R.id.currencyList);
         adapter = new CurrencyInfoAdapter(inflater, currencies, ((MainActivity)getActivity()).favorites);
         recyclerView.setAdapter(adapter);
@@ -157,6 +161,14 @@ public class HomeFragment extends Fragment {
         setSearchBarMenu(inflater, container);
     }
 
+    public void trackAnalytics(String key, String value, String event){
+        Bundle params = new Bundle();
+        params.putString(key, value);
+        if(mFirebaseAnalytics != null) {
+            mFirebaseAnalytics.logEvent(event, params);
+        }
+    }
+
     public void setSearchBarMenu(final LayoutInflater inflater, final ViewGroup container) {
         searchBar.getMenu().setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -165,20 +177,25 @@ public class HomeFragment extends Fragment {
                 switch (item.getItemId()){
                     case R.id.pricehilo:
                         sortType = 1;
+                        trackAnalytics("sort", "price_hi_to_low", "sort_menu_clicked");
                         break;
                     case R.id.pricelohi:
                         sortType = 2;
+                        trackAnalytics("sort", "price_low_to_high", "sort_menu_clicked");
                         checkIfChecked(item);
                         break;
                     case R.id.percenthilo:
                         sortType = 3;
+                        trackAnalytics("sort", "percent_high_to_low", "sort_menu_clicked");
                         checkIfChecked(item);
                         break;
                     case R.id.percentlohi:
                         sortType = 4;
+                        trackAnalytics("sort", "price_high_to_low", "sort_menu_clicked");
                         checkIfChecked(item);
                         break;
                     case R.id.fav:
+                        trackAnalytics("sort", "favorites checked", "sort_menu_clicked");
                         if(!item.isChecked()) {
                             item.setChecked(true);
                             favoritesChecked = true;
@@ -365,7 +382,7 @@ public class HomeFragment extends Fragment {
                     }
                     if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("USDT")){
                         if(favoritesChecked){
-                            if(((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])
+                            if((getActivity()) != null &&((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])
                                     ||(((MainActivity)getActivity()).favorites.contains("BCH") && jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC"))){
                                 currencies.add(setCurrencyInfo(jsonObject));
                             }

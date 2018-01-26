@@ -225,8 +225,10 @@ public class ProfileFragment extends Fragment {
                         }
                         view = inflater.inflate(R.layout.profile_view, container, false);
                         setCurrentUser();
-                        ((MainActivity)getActivity()).bottomNavigation.setCurrentItem(1, false);
-                        getActivity().getSupportFragmentManager().popBackStackImmediate();
+                        if(getActivity() != null) {
+                            ((MainActivity) getActivity()).bottomNavigation.setCurrentItem(1, false);
+                            getActivity().getSupportFragmentManager().popBackStackImmediate();
+                        }
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -239,11 +241,11 @@ public class ProfileFragment extends Fragment {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                                Toast.makeText(getActivity(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                if(isAdded()) {
+                                    Toast.makeText(getActivity(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                }
                                 view = inflater.inflate(R.layout.profile_view, container, false);
                                 setCurrentUser();
-                                ((MainActivity)getActivity()).bottomNavigation.setCurrentItem(1, false);
-                                getActivity().getSupportFragmentManager().popBackStackImmediate();
                             }
                         }
                     });
@@ -257,9 +259,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setCurrentUser() {
-        ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        ((MainActivity)getActivity()).initializeFirebaseDB();
-        ((MainActivity)getActivity()).getFavorites();
+        if(getActivity() != null) {
+            ((MainActivity) getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            ((MainActivity) getActivity()).initializeFirebaseDB();
+            ((MainActivity) getActivity()).getFavorites();
+            ((MainActivity) getActivity()).bottomNavigation.setCurrentItem(1, false);
+            getActivity().getSupportFragmentManager().popBackStackImmediate();
+        }
     }
 
     //Life cycle methods.

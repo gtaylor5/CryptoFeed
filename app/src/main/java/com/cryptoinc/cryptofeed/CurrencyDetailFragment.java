@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -23,6 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.crashlytics.android.Crashlytics;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
@@ -328,6 +330,11 @@ public class CurrencyDetailFragment extends Fragment {
 
     public void setStyling(ArrayList<Entry> chartData, String label) {
 
+        if(chartData.size() == 0){
+            Crashlytics.log("The chart data size is zero for: " + currencyInfo.getName());
+            Toast.makeText(getActivity(), "Chart data could not be loaded.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         LineDataSet lineDataSet = new LineDataSet(chartData, label);
         int color = getResources().getColor(R.color.graph_line_color, null);
@@ -361,16 +368,7 @@ public class CurrencyDetailFragment extends Fragment {
         lineData.setDrawValues(false);
         priceGraph.setData(lineData);
         priceGraph.fitScreen();
-        switch(label){
-            case "Minutely Chart":
-                priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
-                break;
-            case "Hourly Chart":
-                priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
-                break;
-            default:
-                priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
-        }
+        priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
     }
 
     public void setGlobalGraphProperties() {
@@ -445,12 +443,16 @@ public class CurrencyDetailFragment extends Fragment {
 
             @Override
             public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-                priceGraph.getData().setHighlightEnabled(false);
+                if(priceGraph.getData() != null) {
+                    priceGraph.getData().setHighlightEnabled(false);
+                }
             }
 
             @Override
             public void onChartTranslate(MotionEvent me, float dX, float dY) {
-                priceGraph.getData().setHighlightEnabled(false);
+                if(priceGraph.getData() != null) {
+                    priceGraph.getData().setHighlightEnabled(false);
+                }
             }
         });
     }

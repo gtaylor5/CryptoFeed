@@ -33,15 +33,20 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import Utilities.CurrencyInfo;
 import Utilities.NewsInfo;
 import Utilities.RequestSingleton;
 import Utilities.Requests;
+import Utilities.Sort;
 
 public class MainActivity extends AppCompatActivity implements HomeFragment.OnHomeFragmentListener, NewsFragment.OnNewsFragmentItemSelectedListener {
 
@@ -56,11 +61,179 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     public InterstitialAd mInterstitialAd;
     public RewardedVideoAd mRewardVideoAd;
 
-    FirebaseUser currentUser;
+    public FirebaseUser currentUser;
     DatabaseReference favoritesRef;
     DatabaseReference adsRef;
 
     HashSet<String> favorites = new HashSet<>();
+
+    HashMap<String, String> currencySymbolMap = new HashMap<>();
+    volatile ArrayList<CurrencyInfo> currencies = new ArrayList<>();
+    boolean favoritesChecked = false;
+    double BTC_USD = 0.0;
+    final String marketSummariesURL ="https://bittrex.com/api/v1.1/public/getmarketsummaries";
+    final String currencyMetaDataURL = "https://bittrex.com/api/v1.1/public/getmarkets";
+
+    final Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            while(running){
+                getCurrencyData();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    Thread.interrupted();
+                }
+            }
+        }
+    };
+
+    public boolean running = true;
+
+    public void start() {
+        running = true;
+    }
+
+    public void terminate() {
+        running = false;
+    }
+
+    public void getCurrencyNames() {
+        RequestSingleton.getInstance(this).addToRequestQueue(Requests.getStringRequest(currencyMetaDataURL, new Requests.RequestFinishedListener() {
+            @Override
+            public void onRequestFinished(String response) {
+                parseCurrencyNames(response);
+            }
+        }));
+    }
+
+    public void getCurrencyData () {
+        RequestSingleton.getInstance(this).addToRequestQueue(Requests.getStringRequest(marketSummariesURL, new Requests.RequestFinishedListener() {
+            @Override
+            public void onRequestFinished(String response) {
+                parseCurrencyPrices(response);
+            }
+        }));
+    }
+
+    public CurrencyInfo setCurrencyInfo(JSONObject jsonObject) throws JSONException {
+        CurrencyInfo currencyInfo = new CurrencyInfo();
+        currencyInfo.setAsk(jsonObject.getDouble("Ask"));
+        currencyInfo.setBid(jsonObject.getDouble("Bid"));
+        currencyInfo.setCreated(jsonObject.getString("Created"));
+        currencyInfo.setHigh(jsonObject.getDouble("High"));
+        currencyInfo.setLast(jsonObject.getDouble("Last"));
+        currencyInfo.setLow(jsonObject.getDouble("Low"));
+        currencyInfo.setOpenBuyOrders(jsonObject.getInt("OpenBuyOrders"));
+        currencyInfo.setOpenSellOrders(jsonObject.getInt("OpenSellOrders"));
+        currencyInfo.setPrevDay(jsonObject.getDouble("PrevDay"));
+        if (jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC")){
+            currencyInfo.setSymbol("BCH");
+        } else {
+            currencyInfo.setSymbol(jsonObject.getString("MarketName").split("-")[1]);
+        }
+        currencyInfo.setTimeStamp(jsonObject.getString("TimeStamp"));
+        currencyInfo.setTimeStamp(jsonObject.getString("Volume"));
+        currencyInfo.setName(currencySymbolMap.get(currencyInfo.getSymbol()));
+        return currencyInfo;
+    }
+
+    public void parseCurrencyPrices(String response) {
+        try {
+            JSONObject object = new JSONObject(response);
+            JSONArray array = object.getJSONArray("result");
+            currencies.clear();
+            for(int i = 0; i < array.length(); i++){
+                JSONObject jsonObject = array.getJSONObject(i);
+                if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("ETH")){
+                    if(jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BTC")){
+                        if(!favoritesChecked || favorites.contains(jsonObject.getString("MarketName").split("-")[1])){
+                            currencies.add(setCurrencyInfo(jsonObject));
+                        }
+                        BTC_USD = jsonObject.getDouble("Last");
+                    }
+                    if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("USDT")){
+                        if(favoritesChecked){
+                            if(favorites.contains(jsonObject.getString("MarketName").split("-")[1])
+                                    ||(favorites.contains("BCH") && jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC"))){
+                                currencies.add(setCurrencyInfo(jsonObject));
+                            }
+                        } else {
+                            currencies.add(setCurrencyInfo(jsonObject));
+                        }
+                    }
+                }
+            }
+            for(CurrencyInfo info : currencies){
+                info.setBTC_USD(BTC_USD);
+            }
+
+            Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
+            switch(currentFrag.getClass().getSimpleName()){
+                case "HomeFragment": {
+                    switch (((HomeFragment) currentFrag).sortType) {
+                        case 1:
+                            Collections.sort(currencies, Sort.sortPriceHighToLow);
+                            break;
+                        case 2:
+                            Collections.sort(currencies, Sort.sortPriceLowToHigh);
+                            break;
+                        case 3:
+                            Collections.sort(currencies, Sort.sortPercentHighToLow);
+                            break;
+                        case 4:
+                            Collections.sort(currencies, Sort.sortPercentLowToHigh);
+                            break;
+                        default:
+                            Collections.sort(currencies, Sort.sortPercentHighToLow);
+                    }
+                    if (((HomeFragment) currentFrag).favoritesChecked) {
+                        if (favoritesRef != null) {
+                            getFavorites();
+                            ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
+                        }
+                    } else {
+                        ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
+                    }
+                    break;
+                }
+
+                case "PortfolioFragment": {
+
+                }
+            }
+
+            try {
+                progressBar.setVisibility(View.INVISIBLE);
+            }catch (Exception e){
+                //
+            }
+        }catch (JSONException e) {
+            //
+        }
+    }
+
+    public void parseCurrencyNames(String response) {
+        try {
+            JSONObject object = new JSONObject(response);
+            JSONArray array = object.getJSONArray("result");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject jsonObject = array.getJSONObject(i);
+                if (jsonObject.getString("MarketCurrencyLong") == null) {
+                    continue;
+                }
+                if (jsonObject.getString("MarketCurrency").equalsIgnoreCase("bcc")) {
+                    currencySymbolMap.put("BCH", jsonObject.getString("MarketCurrencyLong"));
+                } else {
+                    currencySymbolMap.put(jsonObject.getString("MarketCurrency"), jsonObject.getString("MarketCurrencyLong"));
+                }
+            }
+        } catch (Exception e){
+            Log.d("ERROR", "parseCurrencyNames: " + e.getMessage());
+        }
+        start();
+        new Thread(runnable).start();
+    }
 
 
     @Override
@@ -80,6 +253,15 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             initializeFirebaseDB();
             getFavorites();
         }
+
+        if(currencySymbolMap.size() == 0){
+            progressBar.setVisibility(View.VISIBLE);
+            getCurrencyNames();
+        } else {
+            start();
+            new Thread(runnable).start();
+        }
+
     }
 
     private void initializeAds() {
@@ -121,8 +303,10 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public void onRewarded(RewardItem rewardItem) {
                 long time = System.currentTimeMillis() + (24 * 60 * 60 * 1000);
-                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Ads").child(currentUser.getUid());
-                reference.child("time").setValue(time);
+                if(currentUser != null) {
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Ads").child(currentUser.getUid());
+                    reference.child("time").setValue(time);
+                }
             }
 
             @Override
@@ -235,15 +419,17 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         AHBottomNavigationItem profileItem = new AHBottomNavigationItem("Profile", R.drawable.ic_person_white_24dp);
         AHBottomNavigationItem newsItem = new AHBottomNavigationItem("News", R.drawable.news);
         AHBottomNavigationItem homeItem = new AHBottomNavigationItem("Home", R.drawable.home);
+        AHBottomNavigationItem portfolioItem = new AHBottomNavigationItem("Portfolio", R.drawable.ic_trending_up_black_24dp);
 
         bottomNavigation = findViewById(R.id.bottom_nav);
         bottomNavigation.addItem(profileItem);
         bottomNavigation.addItem(homeItem);
+        bottomNavigation.addItem(portfolioItem);
         bottomNavigation.addItem(newsItem);
         bottomNavigation.setDefaultBackgroundColor(getResources().getColor(R.color.card_color, null));
         bottomNavigation.setAccentColor(getResources().getColor(R.color.negative_red, null));
         bottomNavigation.setInactiveColor(getResources().getColor(R.color.white, null));
-        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
+        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
@@ -268,6 +454,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         } else if(fragment.isVisible()){
                             HomeFragment homeFragment = (HomeFragment)fragment;
                             homeFragment.recyclerView.scrollToPosition(0);
+                            homeFragment.adapter.notifyDataSetChanged();
                         } else {
                             showFragment(fragment);
                         }
@@ -275,13 +462,23 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         break;
                     }
                     case 2: {
+                        Fragment fragment = fragmentManager.findFragmentByTag(PortfolioFragment.class.getSimpleName());
+                        if(fragment == null){
+                            showFragment(new PortfolioFragment());
+                        } else {
+                            showFragment(fragment);
+                        }
+                        bottomNavigation.enableItemAtPosition(2);
+                        break;
+                    }
+                    case 3:  {
                         Fragment fragment = fragmentManager.findFragmentByTag(NewsFragment.class.getSimpleName());
                         if(fragment == null){
                             showFragment(new NewsFragment());
                         } else {
                             showFragment(fragment);
                         }
-                        bottomNavigation.enableItemAtPosition(2);
+                        bottomNavigation.enableItemAtPosition(3);
                         break;
                     }
                 }
@@ -365,6 +562,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     //Override Methods
     //Override Methods
 
+
     @Override
     public void onHomeFragmentItemSelected(CurrencyInfo currencyInfo) {
         currentCurrency = currencyInfo;
@@ -416,4 +614,16 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        terminate();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        start();
+        new Thread(runnable).start();
+    }
 }

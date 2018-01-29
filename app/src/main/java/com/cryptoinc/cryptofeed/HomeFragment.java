@@ -60,42 +60,10 @@ public class HomeFragment extends Fragment {
 
     FirebaseAnalytics mFirebaseAnalytics;
 
-
     // Currency Related Data
 
-    HashMap<String, String> currencySymbolMap = new HashMap<>();
-    volatile ArrayList<CurrencyInfo> currencies = new ArrayList<>();
     int sortType = 1;
     boolean favoritesChecked = false;
-    double BTC_USD = 0.0;
-    final String marketSummariesURL ="https://bittrex.com/api/v1.1/public/getmarketsummaries";
-    final String currencyMetaDataURL = "https://bittrex.com/api/v1.1/public/getmarkets";
-
-    // Threading
-
-    final Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            while(running){
-                getCurrencyData();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    Thread.interrupted();
-                }
-            }
-        }
-    };
-
-    public boolean running = true;
-
-    public void start() {
-        running = true;
-    }
-
-    public void terminate() {
-        running = false;
-    }
 
 
     public HomeFragment(){}
@@ -114,7 +82,7 @@ public class HomeFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_home, container, false);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
         recyclerView = view.findViewById(R.id.currencyList);
-        adapter = new CurrencyInfoAdapter(inflater, currencies, ((MainActivity)getActivity()).favorites);
+        adapter = new CurrencyInfoAdapter(inflater, ((MainActivity)getActivity()).currencies, ((MainActivity)getActivity()).favorites, getActivity());
         recyclerView.setAdapter(adapter);
         manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayout.VERTICAL);
@@ -154,7 +122,7 @@ public class HomeFragment extends Fragment {
                 if(s.length() != 0) {
                     filter(s.toString());
                 } else {
-                    adapter.updateList(currencies);
+                    adapter.updateList(((MainActivity)getActivity()).currencies);
                 }
             }
         });
@@ -198,16 +166,16 @@ public class HomeFragment extends Fragment {
                         trackAnalytics("sort", "favorites checked", "sort_menu_clicked");
                         if(!item.isChecked()) {
                             item.setChecked(true);
-                            favoritesChecked = true;
+                            ((MainActivity)getActivity()).favoritesChecked = true;
                             FirebaseUser user = ((MainActivity)getActivity()).currentUser;
                             if (user == null) {
                                 showPopUpWindow(inflater, container);
                                 item.setChecked(false);
-                                favoritesChecked = false;
+                                ((MainActivity)getActivity()).favoritesChecked = false;
                             }
                         } else {
                             item.setChecked(false);
-                            favoritesChecked = false;
+                            ((MainActivity)getActivity()).favoritesChecked = false;
                         }
                         break;
                 }
@@ -300,156 +268,15 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void getFavorites() {
-        FirebaseUser user = ((MainActivity)getActivity()).currentUser;
-        if(user != null) {
-            if (((MainActivity)getActivity()).favorites.size() == 0) {
-                Toast.makeText(getActivity(), "You do not currently have any fravorites.", Toast.LENGTH_LONG).show();
-                return;
-            }
-            adapter.favorites = (((MainActivity)getActivity()).favorites);
-            adapter.notifyDataSetChanged();
-        }
-
-    }
-
     void filter(String text){
         List<CurrencyInfo> temp = new ArrayList<>();
-        for(CurrencyInfo currencyInfo : currencies){
+        for(CurrencyInfo currencyInfo : ((MainActivity)getActivity()).currencies){
             if(currencyInfo.getSymbol().toLowerCase().contains(text.toLowerCase()) || (currencyInfo.getName() != null && currencyInfo.getName().toLowerCase().contains(text.toLowerCase()))){
                 temp.add(currencyInfo);
             }
 
         }
         adapter.updateList(temp);
-    }
-
-    //Currency Data Requests / Parsing
-
-    public void getCurrencyNames() {
-        RequestSingleton.getInstance(getActivity()).addToRequestQueue(Requests.getStringRequest(currencyMetaDataURL, new Requests.RequestFinishedListener() {
-            @Override
-            public void onRequestFinished(String response) {
-                parseCurrencyNames(response);
-            }
-        }));
-    }
-
-    public void getCurrencyData () {
-        RequestSingleton.getInstance(getActivity()).addToRequestQueue(Requests.getStringRequest(marketSummariesURL, new Requests.RequestFinishedListener() {
-            @Override
-            public void onRequestFinished(String response) {
-                parseCurrencyPrices(response);
-            }
-        }));
-    }
-
-    public CurrencyInfo setCurrencyInfo(JSONObject jsonObject) throws JSONException {
-        CurrencyInfo currencyInfo = new CurrencyInfo();
-        currencyInfo.setAsk(jsonObject.getDouble("Ask"));
-        currencyInfo.setBid(jsonObject.getDouble("Bid"));
-        currencyInfo.setCreated(jsonObject.getString("Created"));
-        currencyInfo.setHigh(jsonObject.getDouble("High"));
-        currencyInfo.setLast(jsonObject.getDouble("Last"));
-        currencyInfo.setLow(jsonObject.getDouble("Low"));
-        currencyInfo.setOpenBuyOrders(jsonObject.getInt("OpenBuyOrders"));
-        currencyInfo.setOpenSellOrders(jsonObject.getInt("OpenSellOrders"));
-        currencyInfo.setPrevDay(jsonObject.getDouble("PrevDay"));
-        if (jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC")){
-            currencyInfo.setSymbol("BCH");
-        } else {
-            currencyInfo.setSymbol(jsonObject.getString("MarketName").split("-")[1]);
-        }
-        currencyInfo.setTimeStamp(jsonObject.getString("TimeStamp"));
-        currencyInfo.setTimeStamp(jsonObject.getString("Volume"));
-        currencyInfo.setName(currencySymbolMap.get(currencyInfo.getSymbol()));
-        return currencyInfo;
-    }
-
-    public void parseCurrencyPrices(String response) {
-        try {
-            JSONObject object = new JSONObject(response);
-            JSONArray array = object.getJSONArray("result");
-            currencies.clear();
-            for(int i = 0; i < array.length(); i++){
-                JSONObject jsonObject = array.getJSONObject(i);
-                if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("ETH")){
-                    if(jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BTC")){
-                        if(!favoritesChecked || ((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])){
-                            currencies.add(setCurrencyInfo(jsonObject));
-                        }
-                        BTC_USD = jsonObject.getDouble("Last");
-                    }
-                    if(!jsonObject.getString("MarketName").split("-")[0].equalsIgnoreCase("USDT")){
-                        if(favoritesChecked){
-                            if((getActivity()) != null &&((MainActivity)getActivity()).favorites.contains(jsonObject.getString("MarketName").split("-")[1])
-                                    ||(((MainActivity)getActivity()).favorites.contains("BCH") && jsonObject.getString("MarketName").split("-")[1].equalsIgnoreCase("BCC"))){
-                                currencies.add(setCurrencyInfo(jsonObject));
-                            }
-                        } else {
-                            currencies.add(setCurrencyInfo(jsonObject));
-                        }
-                    }
-                }
-            }
-            for(CurrencyInfo info : currencies){
-                info.setBTC_USD(BTC_USD);
-            }
-            switch (sortType) {
-                case 1:
-                    Collections.sort(currencies, Sort.sortPriceHighToLow);
-                    break;
-                case 2:
-                    Collections.sort(currencies, Sort.sortPriceLowToHigh);
-                    break;
-                case 3:
-                    Collections.sort(currencies, Sort.sortPercentHighToLow);
-                    break;
-                case 4:
-                    Collections.sort(currencies, Sort.sortPercentLowToHigh);
-                    break;
-                default:
-                    Collections.sort(currencies, Sort.sortPercentHighToLow);
-            }
-            if(favoritesChecked){
-                if (((MainActivity)getActivity()).favoritesRef != null) {
-                    getFavorites();
-                    adapter.notifyDataSetChanged();
-                }
-            }else{
-                adapter.notifyDataSetChanged();
-            }
-
-            try {
-                ((MainActivity) getActivity()).progressBar.setVisibility(View.INVISIBLE);
-            }catch (Exception e){
-                //
-            }
-        }catch (JSONException e){
-            //
-        }
-    }
-
-    public void parseCurrencyNames(String response) {
-        try {
-            JSONObject object = new JSONObject(response);
-            JSONArray array = object.getJSONArray("result");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject jsonObject = array.getJSONObject(i);
-                if (jsonObject.getString("MarketCurrencyLong") == null) {
-                    continue;
-                }
-                if (jsonObject.getString("MarketCurrency").equalsIgnoreCase("bcc")) {
-                    currencySymbolMap.put("BCH", jsonObject.getString("MarketCurrencyLong"));
-                } else {
-                    currencySymbolMap.put(jsonObject.getString("MarketCurrency"), jsonObject.getString("MarketCurrencyLong"));
-                }
-            }
-        } catch (Exception e){
-            Log.d("ERROR", "parseCurrencyNames: " + e.getMessage());
-        }
-        start();
-        new Thread(runnable).start();
     }
 
     // Lifecycle Methods
@@ -473,20 +300,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(currencySymbolMap.size() == 0) {
-            ((MainActivity)getActivity()).progressBar.setVisibility(View.VISIBLE);
-            getCurrencyNames();
-            selectOne();
-        }else {
-            start();
-            new Thread(runnable).start();
-        }
+        adapter.currencies = ((MainActivity)getActivity()).currencies;
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        terminate();
     }
 
     @Override

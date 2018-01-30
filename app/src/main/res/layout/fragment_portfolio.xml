@@ -6,87 +6,96 @@
     android:backgroundTint="@color/background"
     android:visibility="visible"
     tools:context=".PortfolioFragment">
-
-
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-
-        <android.support.v7.widget.CardView
-            android:id="@+id/jumbotron"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="125dp"
-            android:layout_margin="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="10dp"
-            app:cardBackgroundColor="@color/card_color"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="24dp"
-            android:layout_gravity="center_horizontal">
+            android:layout_height="wrap_content">
 
-            <RelativeLayout
+            <android.support.v7.widget.CardView
+                android:id="@+id/jumbotron"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:backgroundTint="@android:color/transparent"
-                    android:text="$ 3000.00"
-                    android:textColor="@color/white"
-                    android:textSize="30sp"
-                    android:layout_marginTop="25dp"
-                    android:id="@+id/portfolio_value"
-                    android:layout_centerHorizontal="true"/>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_below="@id/portfolio_value"
-                    android:layout_centerHorizontal="true">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:textSize="20sp"
-                        android:text="$ 200.00"
-                        android:id="@+id/portfolioDollarChange"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:textSize="20sp"
-                        android:text="+25.14 %"
-                        android:id="@+id/portfolioPercentageChange"/>
-                </LinearLayout>
-
-            </RelativeLayout>
-
-
-            </android.support.v7.widget.CardView>
-
-            <include layout="@layout/pie_chart_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="175dp"
                 android:layout_margin="10dp"
-                android:layout_below="@id/jumbotron"
-                android:id="@+id/pie_chart"/>
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/card_color"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="24dp"
+                android:layout_gravity="center_horizontal">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/portfolioList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_margin="10dp"
-                android:layout_below="@id/pie_chart">
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:gravity="center">
 
-            </android.support.v7.widget.RecyclerView>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:backgroundTint="@android:color/transparent"
+                            android:text="$ 3000.00"
+                            android:textColor="@color/white"
+                            android:textSize="40sp"
+                            android:layout_marginTop="25dp"
+                            android:layout_marginBottom="15dp"
+                            android:id="@+id/portfolio_value"
+                            android:layout_centerHorizontal="true"
+                            android:textAlignment="center"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_below="@id/portfolio_value"
+                            android:layout_centerHorizontal="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:textColor="@color/white"
+                                android:textSize="20sp"
+                                android:textAlignment="center"
+                                android:text="$ 200.00"
+                                android:id="@+id/portfolioDollarChange"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="10dp"
+                                android:textColor="@color/white"
+                                android:textSize="20sp"
+                                android:textAlignment="center"
+                                android:text="+25.14 %"
+                                android:id="@+id/portfolioPercentageChange"/>
+                        </LinearLayout>
 
-    </RelativeLayout>
+                    </RelativeLayout>
+
+                </android.support.v7.widget.CardView>
+
+                <include layout="@layout/pie_chart_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:layout_below="@id/jumbotron"
+                    android:id="@+id/pie_chart"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/portfolioList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_margin="10dp"
+                    android:layout_below="@id/pie_chart">
+
+                </android.support.v7.widget.RecyclerView>
+
+        </RelativeLayout>
+
+    </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"

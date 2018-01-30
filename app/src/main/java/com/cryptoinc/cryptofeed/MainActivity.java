@@ -22,7 +22,6 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -558,10 +557,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         }
         bottomNavigation.setCurrentItem(1, true);
     }
-
-    //Override Methods
-    //Override Methods
-
 
     @Override
     public void onHomeFragmentItemSelected(CurrencyInfo currencyInfo) {

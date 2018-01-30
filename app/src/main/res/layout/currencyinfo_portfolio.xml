@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginTop="10dp"
+    android:layout_marginLeft="15dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="#123"
+    app:cardCornerRadius="@dimen/corner_radius"
+    app:cardElevation="24dp"
+    android:clipChildren="true"
+    android:id="@+id/currencyView">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/card_color"
+        android:background="@drawable/rounded_corners">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:backgroundTint="@color/card_color"
+            android:id="@+id/priceViews">
+
+            <ImageView
+                android:id="@+id/currency_logo"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/rounded_corners"
+                android:backgroundTint="@color/card_color"
+                android:padding="5dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_toEndOf="@id/currency_logo"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:layout_centerVertical="true">
+
+                <TextView
+                    android:id="@+id/currency_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="Bitcoin"
+                    android:maxLines="2"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/card_text"
+                    android:maxLength="15"
+                    android:layout_centerVertical="true"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/currencyQuantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:text="+24.21%"
+                        android:textAlignment="center"
+                        android:textColor="@color/card_text"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:text="$7500.25"
+                        android:layout_margin="10dp"
+                        android:id="@+id/currencyValue"
+                        android:textColor="@color/card_text"/>
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

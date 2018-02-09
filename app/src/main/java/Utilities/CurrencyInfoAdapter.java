@@ -1,6 +1,7 @@
 package Utilities;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cryptoinc.cryptofeed.MainActivity;
 import com.cryptoinc.cryptofeed.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -40,15 +42,17 @@ import java.util.List;
 
 public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHolder> {
 
-     ArrayList<CurrencyInfo> currencies;
+    public ArrayList<CurrencyInfo> currencies;
     public HashSet<String> favorites = new HashSet<>();
     private LayoutInflater layoutInflater;
     private ViewGroup container;
     private FirebaseAnalytics mFirebaseAnalytics;
-    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites){
+    Activity currentActivity;
+    public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites, Activity activity){
         this.layoutInflater = layoutInflater;
         this.currencies = currencies;
         this.favorites = favorites;
+        this.currentActivity = activity;
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(layoutInflater.getContext());
     }
 
@@ -94,6 +98,11 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(FirebaseAuth.getInstance().getCurrentUser() != null){
                         Toast.makeText(container.getContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        if(currentActivity.getClass().getSimpleName().equalsIgnoreCase("MainActivity")) {
+                            MainActivity activity = (MainActivity) currentActivity;
+                            activity.currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                            activity.initializeFirebaseDB();
+                        }
                         popupWindow.dismiss();
                     }
                 }
@@ -105,6 +114,11 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(FirebaseAuth.getInstance().getCurrentUser() != null){
                                 Toast.makeText(container.getContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                if(currentActivity.getClass().getSimpleName().equalsIgnoreCase("MainActivity")) {
+                                    MainActivity activity = (MainActivity) currentActivity;
+                                    activity.currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                                    activity.initializeFirebaseDB();
+                                }
                                 popupWindow.dismiss();
                             }
                         }

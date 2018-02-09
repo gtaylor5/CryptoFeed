@@ -5,8 +5,10 @@
     android:layout_height="match_parent"
     android:backgroundTint="@color/background"
     android:visibility="visible"
-    tools:context=".PortfolioFragment">
+    tools:context=".PortfolioFragment"
+    >
     <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <RelativeLayout
@@ -42,15 +44,27 @@
                             android:textColor="@color/white"
                             android:textSize="40sp"
                             android:layout_marginTop="25dp"
-                            android:layout_marginBottom="15dp"
+                            android:layout_marginBottom="5dp"
                             android:id="@+id/portfolio_value"
                             android:layout_centerHorizontal="true"
+                            android:textAlignment="center"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_value_text_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:text="@string/portfolio_value"
+                            android:textSize="15sp"
+                            android:layout_below="@id/portfolio_value"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginBottom="10dp"
                             android:textAlignment="center"/>
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:layout_below="@id/portfolio_value"
+                            android:layout_below="@id/portfolio_value_text_view"
                             android:layout_centerHorizontal="true">
                             <TextView
                                 android:layout_width="wrap_content"
@@ -88,7 +102,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_margin="10dp"
                     android:layout_below="@id/pie_chart">
 
                 </android.support.v7.widget.RecyclerView>

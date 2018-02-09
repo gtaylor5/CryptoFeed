@@ -12,6 +12,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 /**
  * Created by Gerard on 11/10/2017.
@@ -39,7 +40,7 @@ public class CurrencyInfoPortfolioViewHolder extends RecyclerView.ViewHolder{
 
     public void setViews(final CurrencyInfo info, double quantity){
         currencyName.setText(info.getName());
-        String quantityText = String.valueOf(quantity) + " " + info.getSymbol();
+        String quantityText = String.format(Locale.US,"%.2f",quantity) + " " + info.getSymbol();
         currencyQuantity.setText(quantityText);
         if(info.getSymbol().equalsIgnoreCase("BTC")) {
             currencyValue.setText(defaultformatter.format(quantity * info.getBTC_USD()));

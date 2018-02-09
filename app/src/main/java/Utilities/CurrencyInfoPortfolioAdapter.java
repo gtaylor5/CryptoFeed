@@ -55,10 +55,13 @@ public class CurrencyInfoPortfolioAdapter extends RecyclerView.Adapter<CurrencyI
                 params.putString("currency_name", currencyInfo.getName());
                 mFirebaseAnalytics.logEvent("currency_clicked", params);
                 new MaterialDialog.Builder(layoutInflater.getContext())
+                        .backgroundColor(layoutInflater.getContext().getResources().getColor(R.color.background, null))
                         .title("Set Quantity")
+                        .titleColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
                         .content(currencyInfo.getSymbol())
+                        .contentColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
                         .inputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
-                        .input("1.2345", null, false, new MaterialDialog.InputCallback() {
+                        .input("You have: "+holder.currencyQuantity.getText(), null, false, new MaterialDialog.InputCallback() {
                             @Override
                             public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
                                 try {

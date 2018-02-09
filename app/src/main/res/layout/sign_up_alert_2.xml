@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:id="@+id/container"
+    android:gravity="center">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/alertHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_up_to_create_portfolio"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:textAlignment="center"
+                style="@style/Base.TextAppearance.AppCompat.Medium"/>
+
+            <EditText
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:id="@+id/email"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:textColorHint="@color/negative_red"
+                android:backgroundTint="@color/white"
+                android:layout_margin="10dp"
+                android:textColor="@color/negative_red"/>
+
+            <EditText
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:id="@+id/password"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:textColorHint="@color/negative_red"
+                android:backgroundTint="@color/white"
+                android:layout_margin="10dp"
+                android:textColor="@color/negative_red"/>
+
+            <TextView
+                android:id="@+id/switchview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/already"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:textSize="12sp"/>
+
+            <Button
+                android:id="@+id/login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:text="SIGN UP"
+                android:textColor="@color/negative_red"
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="20dp"/>
+
+        </LinearLayout>
+
+
+</LinearLayout>

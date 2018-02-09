@@ -122,7 +122,9 @@ public class HomeFragment extends Fragment {
                 if(s.length() != 0) {
                     filter(s.toString());
                 } else {
-                    adapter.updateList(((MainActivity)getActivity()).currencies);
+                    if(getActivity() != null) {
+                        adapter.updateList(((MainActivity) getActivity()).currencies);
+                    }
                 }
             }
         });
@@ -141,7 +143,9 @@ public class HomeFragment extends Fragment {
         searchBar.getMenu().setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                ((MainActivity)getActivity()).progressBar.setVisibility(View.VISIBLE);
+                if(getActivity()!= null) {
+                    ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
+                }
                 switch (item.getItemId()){
                     case R.id.pricehilo:
                         sortType = 1;
@@ -269,14 +273,16 @@ public class HomeFragment extends Fragment {
     }
 
     void filter(String text){
-        List<CurrencyInfo> temp = new ArrayList<>();
-        for(CurrencyInfo currencyInfo : ((MainActivity)getActivity()).currencies){
-            if(currencyInfo.getSymbol().toLowerCase().contains(text.toLowerCase()) || (currencyInfo.getName() != null && currencyInfo.getName().toLowerCase().contains(text.toLowerCase()))){
-                temp.add(currencyInfo);
-            }
+        if(getActivity() != null) {
+            List<CurrencyInfo> temp = new ArrayList<>();
+            for (CurrencyInfo currencyInfo : ((MainActivity) getActivity()).currencies) {
+                if (currencyInfo.getSymbol().toLowerCase().contains(text.toLowerCase()) || (currencyInfo.getName() != null && currencyInfo.getName().toLowerCase().contains(text.toLowerCase()))) {
+                    temp.add(currencyInfo);
+                }
 
+            }
+            adapter.updateList(temp);
         }
-        adapter.updateList(temp);
     }
 
     // Lifecycle Methods
@@ -300,8 +306,11 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        adapter.currencies = ((MainActivity)getActivity()).currencies;
-        adapter.notifyDataSetChanged();
+        if(getActivity() != null) {
+            adapter.currencies = ((MainActivity) getActivity()).currencies;
+            adapter.notifyDataSetChanged();
+            selectOne();
+        }
     }
 
     @Override

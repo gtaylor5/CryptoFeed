@@ -4,15 +4,26 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.ads.AdListener;
@@ -22,6 +33,10 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -72,6 +87,17 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     double BTC_USD = 0.0;
     final String marketSummariesURL ="https://bittrex.com/api/v1.1/public/getmarketsummaries";
     final String currencyMetaDataURL = "https://bittrex.com/api/v1.1/public/getmarkets";
+
+    private static final HashMap<String, Integer> fragmentTabMap;
+
+    static {
+        fragmentTabMap = new HashMap<>();
+        fragmentTabMap.put(CurrencyDetailFragment.class.getSimpleName(), 1);
+        fragmentTabMap.put(ProfileFragment.class.getSimpleName(), 0);
+        fragmentTabMap.put(HomeFragment.class.getSimpleName(), 1);
+        fragmentTabMap.put(PortfolioFragment.class.getSimpleName(), 2);
+        fragmentTabMap.put(NewsFragment.class.getSimpleName(), 3);
+    }
 
     final Runnable runnable = new Runnable() {
         @Override
@@ -168,6 +194,9 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             }
 
             Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
+            if(currentFrag == null){
+                currentFrag = getSupportFragmentManager().findFragmentById(R.id.list_view);
+            }
             switch(currentFrag.getClass().getSimpleName()){
                 case "HomeFragment": {
                     switch (((HomeFragment) currentFrag).sortType) {
@@ -195,10 +224,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
                     }
                     break;
-                }
-
-                case "PortfolioFragment": {
-
                 }
             }
 
@@ -238,11 +263,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Configuration config = getResources().getConfiguration();
-        if(config.smallestScreenWidthDp >= 600) {
+        if(getResources().getBoolean(R.bool.set_landscape)) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             setContentView(R.layout.activity_main_large);
         } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             setContentView(R.layout.activity_main);
         }
         setNavBar();
@@ -433,6 +458,8 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
+                numberOfClicks++;
+                showAd();
                 switch (position) {
                     case 0: {
                         Fragment fragment = fragmentManager.findFragmentByTag(ProfileFragment.class.getSimpleName());
@@ -461,14 +488,21 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         break;
                     }
                     case 2: {
-                        Fragment fragment = fragmentManager.findFragmentByTag(PortfolioFragment.class.getSimpleName());
-                        if(fragment == null){
-                            showFragment(new PortfolioFragment());
+                        if(currentUser != null) {
+                            Fragment fragment = fragmentManager.findFragmentByTag(PortfolioFragment.class.getSimpleName());
+                            if (fragment == null) {
+                                showFragment(new PortfolioFragment());
+                            } else if (fragment.isVisible()) {
+                                //
+                            } else {
+                                showFragment(fragment);
+                            }
+                            bottomNavigation.enableItemAtPosition(2);
+                            break;
                         } else {
-                            showFragment(fragment);
+                            showPopUpWindow(2);
+                            break;
                         }
-                        bottomNavigation.enableItemAtPosition(2);
-                        break;
                     }
                     case 3:  {
                         Fragment fragment = fragmentManager.findFragmentByTag(NewsFragment.class.getSimpleName());
@@ -487,6 +521,82 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         bottomNavigation.enableItemAtPosition(1);
         bottomNavigation.setCurrentItem(1);
     }
+
+    public void showPopUpWindow(final int sender) {
+        final MaterialDialog materialDialog = new MaterialDialog.Builder(this)
+                .backgroundColor(getResources().getColor(R.color.background, null))
+                .titleColor(getResources().getColor(R.color.white, null))
+                .contentColor(getResources().getColor(R.color.white, null))
+                .customView(R.layout.sign_up_alert_2, false).build();
+        View popUp = materialDialog.getCustomView();
+        if(popUp != null) {
+            final EditText email = popUp.findViewById(R.id.email);
+            final EditText password = popUp.findViewById(R.id.password);
+            final TextView switchView = popUp.findViewById(R.id.switchview);
+            final TextView heading = popUp.findViewById(R.id.alertHeading);
+            final Button login = popUp.findViewById(R.id.login);
+            switchView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (switchView.getText().toString().contains("Sign In")) {
+                        switchView.setText(R.string.newuser);
+                        heading.setText("Sign In to Create Portfolio");
+                        login.setText("Sign In");
+                    } else {
+                        switchView.setText(R.string.already);
+                        heading.setText("Sign Up to Create Portfolio");
+                        login.setText("Sign Up");
+                    }
+                }
+            });
+
+            login.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    authenticateNewUser(materialDialog, email, password, sender);
+                }
+            });
+            materialDialog.show();
+        }
+    }
+
+    public void authenticateNewUser(final MaterialDialog popupWindow, final EditText email, final EditText password, final int sender) {
+        if(email.getText().toString().contains("@") && password.getText().toString().length() != 0){
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                        Toast.makeText(getApplicationContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                        getFavorites();
+                        bottomNavigation.setCurrentItem(sender, true);
+                        popupWindow.dismiss();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(FirebaseAuth.getInstance().getCurrentUser() != null){
+                                Toast.makeText(getApplicationContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                                currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                                getFavorites();
+                                popupWindow.dismiss();
+                            }
+                        }
+                    });
+                }
+            });
+        } else if (!email.getText().toString().contains("@")){
+            Toast.makeText(getApplicationContext(), "Invalid Email Address. Please try again.", Toast.LENGTH_LONG).show();
+        } else if (password.getText().toString().length() == 0){
+            Toast.makeText(getApplicationContext(), "You must enter a pasaword.", Toast.LENGTH_LONG).show();
+
+        }
+    }
+
 
     // Fragment Managment
 
@@ -517,35 +627,28 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         if(findViewById(R.id.activity_main) != null) {
             try {
                 getSupportFragmentManager().popBackStackImmediate();
-            } catch (Exception e) {
-                //
-            } finally {
-
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
                 if (currentFragment != null) {
-                    if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment") || currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
-                        bottomNavigation.enableItemAtPosition(1);
-                        bottomNavigation.setCurrentItem(1, false);
-                    } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
-                        bottomNavigation.enableItemAtPosition(2);
+                    //bottomNavigation.enableItemAtPosition(fragmentTabMap.get(currentFragment.getClass().getSimpleName()));
+                    if(currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment")){
+                        bottomNavigation.setCurrentItem(fragmentTabMap.get(currentFragment.getClass().getSimpleName()), false);
+                    } else {
+                        bottomNavigation.setCurrentItem(fragmentTabMap.get(currentFragment.getClass().getSimpleName()), true);
                     }
                 }
+            } catch (Exception e) {
+                Log.d("ERROR",  e.getMessage());
             }
         } else {
             try {
                 getSupportFragmentManager().popBackStackImmediate();
-            } catch (Exception e) {
-                //
-            } finally {
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.list_view);
                 if (currentFragment != null) {
-                    if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("HomeFragment")) {
-                        bottomNavigation.enableItemAtPosition(1);
-                        bottomNavigation.setCurrentItem(1, false);
-                    } else if (currentFragment.getClass().getSimpleName().equalsIgnoreCase("NewsFragment")) {
-                        bottomNavigation.enableItemAtPosition(2);
-                    }
+                    bottomNavigation.enableItemAtPosition(fragmentTabMap.get(currentFragment.getClass().getSimpleName()));
+                    bottomNavigation.setCurrentItem(fragmentTabMap.get(currentFragment.getClass().getSimpleName()));
                 }
+            } catch (Exception e) {
+                //
             }
         }
     }
@@ -556,6 +659,14 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             fm.popBackStackImmediate();
         }
         bottomNavigation.setCurrentItem(1, true);
+        if(fm.findFragmentById(R.id.detailView) != null){
+            Fragment currentFragment = fm.findFragmentById(R.id.detailView);
+            if(currentFragment.getClass().getSimpleName().equalsIgnoreCase("PortfolioFragment")){
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.remove(currentFragment);
+                ft.commit();
+            }
+        }
     }
 
     @Override

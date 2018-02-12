@@ -197,36 +197,38 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             if(currentFrag == null){
                 currentFrag = getSupportFragmentManager().findFragmentById(R.id.list_view);
             }
-            switch(currentFrag.getClass().getSimpleName()){
-                case "HomeFragment": {
-                    switch (((HomeFragment) currentFrag).sortType) {
-                        case 1:
-                            Collections.sort(currencies, Sort.sortPriceHighToLow);
-                            break;
-                        case 2:
-                            Collections.sort(currencies, Sort.sortPriceLowToHigh);
-                            break;
-                        case 3:
-                            Collections.sort(currencies, Sort.sortPercentHighToLow);
-                            break;
-                        case 4:
-                            Collections.sort(currencies, Sort.sortPercentLowToHigh);
-                            break;
-                        default:
-                            Collections.sort(currencies, Sort.sortPercentHighToLow);
-                    }
-                    if (((HomeFragment) currentFrag).favoritesChecked) {
-                        if (favoritesRef != null) {
-                            getFavorites();
+            if(currentFrag != null){
+                switch(currentFrag.getClass().getSimpleName()){
+                    case "HomeFragment": {
+                        switch (((HomeFragment) currentFrag).sortType) {
+                            case 1:
+                                Collections.sort(currencies, Sort.sortPriceHighToLow);
+                                break;
+                            case 2:
+                                Collections.sort(currencies, Sort.sortPriceLowToHigh);
+                                break;
+                            case 3:
+                                Collections.sort(currencies, Sort.sortPercentHighToLow);
+                                break;
+                            case 4:
+                                Collections.sort(currencies, Sort.sortPercentLowToHigh);
+                                break;
+                            default:
+                                Collections.sort(currencies, Sort.sortPercentHighToLow);
+                        }
+                        if (((HomeFragment) currentFrag).favoritesChecked) {
+                            if (favoritesRef != null) {
+                                getFavorites();
+                                ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
+                            }
+                        } else {
                             ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
                         }
-                    } else {
-                        ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
+                        break;
                     }
-                    break;
                 }
-            }
-
+            } 
+            
             try {
                 progressBar.setVisibility(View.INVISIBLE);
             }catch (Exception e){

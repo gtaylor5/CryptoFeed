@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.cryptoinc.cryptofeed.MainActivity;
 import com.cryptoinc.cryptofeed.R;
+import com.cryptoinc.cryptofeed.databinding.CurrencyinfoBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -56,139 +57,59 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(layoutInflater.getContext());
     }
 
-    public void showPopUpWindow(LayoutInflater inflater, ViewGroup container) {
-        final PopupWindow popupWindow;
-        View popUp = inflater.inflate(R.layout.sign_up_alert, container, false);
-        final EditText email = popUp.findViewById(R.id.email);
-        final EditText password = popUp.findViewById(R.id.password);
-        final Button login = popUp.findViewById(R.id.signUp);
-        final TextView switchView = popUp.findViewById(R.id.switchview);
-        final TextView heading = popUp.findViewById(R.id.alertHeading);
-        switchView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (switchView.getText().toString().contains("Sign In")) {
-                    switchView.setText(R.string.newuser);
-                    heading.setText(R.string.please_sign_in_to_add_favorites);
-                } else {
-                    switchView.setText(R.string.already);
-                    heading.setText(R.string.please_sign_up_to_add_favorites);
-                }
-            }
-        });
-
-        popupWindow = new PopupWindow(popUp, container.getWidth(),container.getHeight(), true);
-        popupWindow.showAtLocation(popUp, Gravity.CENTER_VERTICAL, 0, 0);
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    imm.hideSoftInputFromInputMethod(v.getWindowToken(), 0);
-                }
-                authenticateNewUser(popupWindow, email, password);
-            }
-        });
-    }
-
-    public void authenticateNewUser(final PopupWindow popupWindow, final EditText email, final EditText password) {
-        if(email.getText().toString().contains("@") && password.getText().toString().length() != 0){
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                        Toast.makeText(container.getContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
-                        if(currentActivity.getClass().getSimpleName().equalsIgnoreCase("MainActivity")) {
-                            MainActivity activity = (MainActivity) currentActivity;
-                            activity.currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                            activity.initializeFirebaseDB();
-                        }
-                        popupWindow.dismiss();
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                                Toast.makeText(container.getContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
-                                if(currentActivity.getClass().getSimpleName().equalsIgnoreCase("MainActivity")) {
-                                    MainActivity activity = (MainActivity) currentActivity;
-                                    activity.currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                                    activity.initializeFirebaseDB();
-                                }
-                                popupWindow.dismiss();
-                            }
-                        }
-                    });
-                }
-            });
-        } else if (!email.getText().toString().contains("@")){
-            Toast.makeText(container.getContext(), "Invalid Email Address. Please try again.", Toast.LENGTH_LONG).show();
-        } else if (password.getText().toString().length() == 0){
-            Toast.makeText(container.getContext(), "You must enter a pasaword.", Toast.LENGTH_LONG).show();
-
-        }
-    }
-
     @Override
     public CurrencyInfoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = layoutInflater.inflate(R.layout.currencyinfo, parent, false);
+        View v = layoutInflater.inflate(R.layout.currencyinfo, parent, false);
         this.container = parent;
-        return new CurrencyInfoViewHolder(view);
+        return new CurrencyInfoViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(final CurrencyInfoViewHolder holder, int position) {
         final CurrencyInfo currencyInfo = currencies.get(position);
         holder.setViews(currencyInfo, favorites);
-        holder.getV().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle params = new Bundle();
-                params.putString("currency_name", currencyInfo.getName());
-                mFirebaseAnalytics.logEvent("currency_clicked", params);
-                currencyInfoListListener.currencySelected(currencyInfo);
-            }
+        holder.getV().setOnClickListener(v -> {
+            Bundle params = new Bundle();
+            params.putString("currency_name", currencyInfo.getName());
+            mFirebaseAnalytics.logEvent("currency_clicked", params);
+            currencyInfoListListener.currencySelected(currencyInfo);
         });
         
-        holder.favoriteImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if(user == null){
-                    showPopUpWindow(layoutInflater, container);
-                } else {
-                    FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    final DatabaseReference reference = database.getReference("users").child(user.getUid()).child("favorites");
-                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                                if(snapshot.getValue() != null) {
-                                    if (((String) (snapshot.getValue())).equalsIgnoreCase(holder.currencySymbol.getText().toString())) {
-                                        DatabaseReference ref = reference.child(snapshot.getKey());
-                                        favorites.remove(holder.currencySymbol.getText().toString());
-                                        ref.setValue(null);
-                                        holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
-                                        //notifyDataSetChanged();
-                                        return;
-                                    }
+        holder.favoriteImage.setOnClickListener(v -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if(user == null){
+                MainActivity activity = (MainActivity) currentActivity;
+                activity.showPopUpWindow(1, activity.getResources().getString(R.string.please_sign_up_to_add_favorites),
+                        activity.getResources().getString(R.string.sign_up), activity.getResources().getString(R.string.please_sign_in_to_add_favorites),
+                                activity.getResources().getString(R.string.already));
+            } else {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                final DatabaseReference reference = database.getReference("users").child(user.getUid()).child("favorites");
+                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                            if(snapshot.getValue() != null) {
+                                if (((String) (snapshot.getValue())).equalsIgnoreCase(currencyInfo.getSymbol())) {
+                                    DatabaseReference ref = reference.child(snapshot.getKey());
+                                    favorites.remove(currencyInfo.getSymbol());
+                                    ref.setValue(null);
+                                    holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
+                                    //notifyDataSetChanged();
+                                    return;
                                 }
                             }
-                            reference.push().setValue(holder.currencySymbol.getText().toString());
-                            holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.negative_red, null));
-                            favorites.add(holder.currencySymbol.getText().toString());
                         }
+                        reference.push().setValue(currencyInfo.getSymbol());
+                        holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.negative_red, null));
+                        favorites.add(currencyInfo.getSymbol());
+                    }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
+                    }
+                });
             }
         });
         

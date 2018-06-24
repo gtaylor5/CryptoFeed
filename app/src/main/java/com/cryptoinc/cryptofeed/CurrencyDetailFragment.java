@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,13 +16,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
@@ -64,14 +60,6 @@ public class CurrencyDetailFragment extends Fragment {
 
     CurrencyInfo currencyInfo;
 
-    //currency price bar
-
-    TextView currencyLabel;
-    TextView currencyPrice;
-    TextView currencyPercentageChange;
-    TextView priceView;
-    TextView timestamp;
-
     //social media stats
 
     TextView twitterSocialActivity;
@@ -79,6 +67,8 @@ public class CurrencyDetailFragment extends Fragment {
 
     // Price Stats
 
+    TextView priceView;
+    TextView timestamp;
     TextView fearOrGreed;
     TextView priceHigh;
     TextView priceLow;
@@ -119,34 +109,18 @@ public class CurrencyDetailFragment extends Fragment {
     ArrayList<Entry> dayChartData = new ArrayList<Entry>();
 
     boolean chartClicked = false;
-    private boolean running = true;
-    double multiplier = 1;
 
     DecimalFormat formatter = new DecimalFormat("$ #,###.00");
     DecimalFormat lessThanOne = new DecimalFormat("$ 0.000");
 
-    String priceRequestURL = "";
-    final String baseURL = "https://bittrex.com/api/v1.1/public/getmarketsummary?market=";
     final String baseSocialActivityURL = "https://frypto-backend.herokuapp.com/api/coins?auth=90886b14-0fd5-4b0f-a9a1-9bd847ebd92e&symbol=";
     final String baseCurrencyAboutURL = "https://www.cryptocompare.com/api/data/coinsnapshotfullbyid/?id=";
-    
-    final Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            while(running){
-                getPriceData();
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    Thread.interrupted();
-                }
-            }
-        }
-    };
 
     public CurrencyDetailFragment() {
         // Required empty public constructor
     }
+
+    // Lifecycle
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -155,10 +129,53 @@ public class CurrencyDetailFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_currency_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_currency_detail, container, false);
+        View v = view;
         initializeViews(v);
         return v;
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        minuteChartData.clear();
+        hourChartData.clear();
+        dayChartData.clear();
+        priceGraph.clear();
+        this.currencyInfo = ((MainActivity)getActivity()).currentCurrency;
+        priceView.setText(formatter.format(currencyInfo.getLast()));
+        if(currencyInfo != null) {
+            updateViews();
+            setGlobalGraphProperties();
+            loadInitialChart();
+            getFirebaseData();
+            getSocialMediaActivity();
+            getFullCoinSnapshotById();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+
+    // Chart stuff
 
     public void loadInitialChart() {
         minuteData.setPressed(true);
@@ -176,22 +193,147 @@ public class CurrencyDetailFragment extends Fragment {
             getMinuteChartData();
             getHourChartData();
             getDayChartData();
-            getCoinSnapshot();
         }
+    }
+
+    public void setStyling(ArrayList<Entry> chartData, String label) {
+
+        if(chartData.size() == 0){
+            Crashlytics.log("The chart data size is zero for: " + currencyInfo.getName());
+            Toast.makeText(getActivity(), "Chart data could not be loaded.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        LineDataSet lineDataSet = new LineDataSet(chartData, label);
+        int color = getResources().getColor(R.color.graph_line_color, null);
+        lineDataSet.setColor(color);
+        lineDataSet.setDrawCircles(false);
+        lineDataSet.setLineWidth(2f);
+        lineDataSet.setHighlightEnabled(true);
+
+
+        //axes
+        XAxis xAxis = priceGraph.getXAxis();
+        xAxis.setLabelCount(3);
+        xAxis.setDrawGridLines(false);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextColor(getResources().getColor(R.color.card_text, null));
+        xAxis.setDrawAxisLine(true);
+        xAxis.setEnabled(true);
+        xAxis.setGranularity(50f);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setValueFormatter(new DateFormatter(label));
+
+
+        YAxis yAxis = priceGraph.getAxisLeft();
+        yAxis.setDrawGridLines(false);
+        yAxis.setTextColor(getResources().getColor(R.color.card_text, null));
+        yAxis.setDrawAxisLine(false);
+        yAxis.setEnabled(false);
+
+
+        LineData lineData = new LineData(lineDataSet);
+        lineData.setDrawValues(false);
+        priceGraph.setData(lineData);
+        priceGraph.fitScreen();
+        priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
+    }
+
+    public void setGlobalGraphProperties() {
+        priceGraph.setNoDataText("");
+        priceGraph.setEnabled(false);
+        priceGraph.setDrawGridBackground(false);
+        priceGraph.getAxisRight().setEnabled(false);
+        priceGraph.setDrawBorders(false);
+        Description description = new Description();
+        description.setText("");
+        priceGraph.setDescription(description);
+        Legend legend = priceGraph.getLegend();
+        legend.setEnabled(false);
+        priceGraph.setHighlightPerDragEnabled(true);
+        priceGraph.setTouchEnabled(true);
+        priceGraph.setViewPortOffsets(-40,0,0,50);
+        setPriceGraphListeners();
+    }
+
+    public void setPriceGraphListeners() {
+        priceGraph.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                priceView.setText(String.format(Locale.US,"$%.3f", e.getY()));
+                timestamp.setText(convertToDateAndTime(e.getX()));
+            }
+
+            @Override
+            public void onNothingSelected() {
+            }
+        });
+
+        priceGraph.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+                priceGraph.getData().setHighlightEnabled(true);
+                chartClicked = true;
+                parentView.requestDisallowInterceptTouchEvent(true);
+            }
+
+            @Override
+            public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+
+                if(me.getAction() == 1){
+                    chartClicked = false;
+                    priceGraph.getData().setHighlightEnabled(false);
+                    parentView.requestDisallowInterceptTouchEvent(false);
+                    updateViews();
+                    chartClicked = false;
+                }
+
+            }
+
+            @Override
+            public void onChartLongPressed(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+            }
+
+            @Override
+            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+                if(priceGraph.getData() != null) {
+                    priceGraph.getData().setHighlightEnabled(false);
+                }
+            }
+
+            @Override
+            public void onChartTranslate(MotionEvent me, float dX, float dY) {
+                if(priceGraph.getData() != null) {
+                    priceGraph.getData().setHighlightEnabled(false);
+                }
+            }
+        });
     }
 
     public void initializeViews(View v) {
 
-            currencyLabel = v.findViewById(R.id.currencyLabel);
-            currencyPrice = v.findViewById(R.id.price);
-            currencyPercentageChange = v.findViewById(R.id.percentageChange);
-            priceView = v.findViewById(R.id.priceView);
-            timestamp = v.findViewById(R.id.timestamp);
 
             twitterSocialActivity = v.findViewById(R.id.twitterSocialActivity);
             redditSocialActivity = v.findViewById(R.id.redditSocialActivity);
             fearOrGreed = v.findViewById(R.id.fearOrGreed);
 
+            priceView = v.findViewById(R.id.priceView);
+            timestamp = v.findViewById(R.id.timestamp);
             priceHigh = v.findViewById(R.id.high);
             priceLow = v.findViewById(R.id.low);
             volume = v.findViewById(R.id.volume);
@@ -222,23 +364,20 @@ public class CurrencyDetailFragment extends Fragment {
     public void updateViews(){
         if(currencyInfo.getSymbol().equalsIgnoreCase("btc")){
             if(!chartClicked) {
-                priceView.setText(formatter.format(currencyInfo.getLast()));
+
                 parseDate();
             }
         } else {
             if(!chartClicked) {
                 if(currencyInfo.getLast() < 1) {
-                    priceView.setText(lessThanOne.format(currencyInfo.getLast() * currencyInfo.getBTC_USD()));
+                    priceView.setText(lessThanOne.format(currencyInfo.getLast()));
                 } else {
-                    priceView.setText(formatter.format(currencyInfo.getLast() * currencyInfo.getBTC_USD()));
+                    priceView.setText(formatter.format(currencyInfo.getLast()));
                 }
             }
             parseDate();
         }
-        String sign = (currencyInfo.getPercentageChange() >= 0 ? "+" : "");
-        currencyPercentageChange.setText(String.format(Locale.US, sign+"%.2f%%", currencyInfo.getPercentageChange()));
         if(isAdded()) {
-            currencyPercentageChange.setTextColor((currencyInfo.getPercentageChange() >= 0) ? getResources().getColor(R.color.positive, null) : getResources().getColor(R.color.negative_red, null));
             statisticsView.setText(R.string.stats);
             aboutView.setText(R.string.about);
             if (currencyInfo.getOpenBuyOrders() >= currencyInfo.getOpenSellOrders()) {
@@ -328,134 +467,7 @@ public class CurrencyDetailFragment extends Fragment {
 
     }
 
-    public void setStyling(ArrayList<Entry> chartData, String label) {
-
-        if(chartData.size() == 0){
-            Crashlytics.log("The chart data size is zero for: " + currencyInfo.getName());
-            Toast.makeText(getActivity(), "Chart data could not be loaded.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        LineDataSet lineDataSet = new LineDataSet(chartData, label);
-        int color = getResources().getColor(R.color.graph_line_color, null);
-        lineDataSet.setColor(color);
-        lineDataSet.setDrawCircles(false);
-        lineDataSet.setLineWidth(2f);
-        lineDataSet.setHighlightEnabled(true);
-
-
-        //axes
-        XAxis xAxis = priceGraph.getXAxis();
-        xAxis.setLabelCount(3);
-        xAxis.setDrawGridLines(false);
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextColor(getResources().getColor(R.color.card_text, null));
-        xAxis.setDrawAxisLine(true);
-        xAxis.setEnabled(true);
-        xAxis.setGranularity(50f);
-        xAxis.setGranularityEnabled(true);
-        xAxis.setValueFormatter(new DateFormatter(label));
-
-
-        YAxis yAxis = priceGraph.getAxisLeft();
-        yAxis.setDrawGridLines(false);
-        yAxis.setTextColor(getResources().getColor(R.color.card_text, null));
-        yAxis.setDrawAxisLine(false);
-        yAxis.setEnabled(false);
-
-
-        LineData lineData = new LineData(lineDataSet);
-        lineData.setDrawValues(false);
-        priceGraph.setData(lineData);
-        priceGraph.fitScreen();
-        priceGraph.animateXY(500, 0, Easing.EasingOption.Linear, Easing.EasingOption.Linear);
-    }
-
-    public void setGlobalGraphProperties() {
-        priceGraph.setNoDataText("");
-        priceGraph.setEnabled(false);
-        priceGraph.setDrawGridBackground(false);
-        priceGraph.getAxisRight().setEnabled(false);
-        priceGraph.setDrawBorders(false);
-        Description description = new Description();
-        description.setText("");
-        priceGraph.setDescription(description);
-        Legend legend = priceGraph.getLegend();
-        legend.setEnabled(false);
-        priceGraph.setHighlightPerDragEnabled(true);
-        priceGraph.setTouchEnabled(true);
-        priceGraph.setViewPortOffsets(-40,0,0,50);
-        setPriceGraphListeners();
-    }
-
-    public void setPriceGraphListeners() {
-        priceGraph.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                priceView.setText(String.format(Locale.US,"$%.3f", e.getY()));
-                timestamp.setText(convertToDateAndTime(e.getX()));
-            }
-
-            @Override
-            public void onNothingSelected() {
-            }
-        });
-
-        priceGraph.setOnChartGestureListener(new OnChartGestureListener() {
-            @Override
-            public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-                    priceGraph.getData().setHighlightEnabled(true);
-                    chartClicked = true;
-                    parentView.requestDisallowInterceptTouchEvent(true);
-            }
-
-            @Override
-            public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-
-                if(me.getAction() == 1){
-                    chartClicked = false;
-                    priceGraph.getData().setHighlightEnabled(false);
-                    parentView.requestDisallowInterceptTouchEvent(false);
-                    updateViews();
-                    chartClicked = false;
-                }
-
-            }
-
-            @Override
-            public void onChartLongPressed(MotionEvent me) {
-
-            }
-
-            @Override
-            public void onChartDoubleTapped(MotionEvent me) {
-
-            }
-
-            @Override
-            public void onChartSingleTapped(MotionEvent me) {
-
-            }
-
-            @Override
-            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
-            }
-
-            @Override
-            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-                if(priceGraph.getData() != null) {
-                    priceGraph.getData().setHighlightEnabled(false);
-                }
-            }
-
-            @Override
-            public void onChartTranslate(MotionEvent me, float dX, float dY) {
-                if(priceGraph.getData() != null) {
-                    priceGraph.getData().setHighlightEnabled(false);
-                }
-            }
-        });
-    }
+    // Requests
 
     public void getHourChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histohour?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
@@ -553,54 +565,6 @@ public class CurrencyDetailFragment extends Fragment {
         RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
-    public void getCoinSnapshot(){
-        String requestString;
-        if(currencyInfo.getSymbol().equalsIgnoreCase("BTC")){
-            requestString = "https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=" + currencyInfo.getSymbol() + "&tsym=USD";
-            multiplier = 1;
-        } else {
-            requestString = "https://www.cryptocompare.com/api/data/coinsnapshot/?fsym=" + currencyInfo.getSymbol() + "&tsym=BTC";
-            multiplier = currencyInfo.getBTC_USD();
-        }
-        StringRequest request = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONObject dataObj = jsonObject.getJSONObject("Data");
-                    if(dataObj.getJSONObject("AggregatedData") != null){
-                        JSONObject obj = dataObj.getJSONObject("AggregatedData");
-                        if (obj.getString("VOLUME24HOUR") != null) {
-                            volume.setText(formatter.format(Double.parseDouble(obj.getString("VOLUME24HOURTO"))*multiplier));
-                        } else {
-                            volume.setText("--");
-                        }
-                        if (obj.getString("HIGH24HOUR") != null) {
-
-                            priceHigh.setText(formatter.format(Double.parseDouble(obj.getString("HIGH24HOUR"))*multiplier));
-                        } else {
-                            priceHigh.setText("--");
-                        }
-                        if (obj.getString("LOW24HOUR") != null) {
-                            priceLow.setText(formatter.format(Double.parseDouble(obj.getString("LOW24HOUR"))*multiplier));
-                        } else {
-                            priceLow.setText("--");
-                        }
-                    }
-                }catch (JSONException e){
-                    //
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        RequestSingleton.getInstance(getActivity()).addToRequestQueue(request);
-    }
-
     public void getFullCoinSnapshotById(){
         try {
             Scanner scanner = new Scanner(getActivity().getApplicationContext().getAssets().open("currency_data.txt"));
@@ -642,29 +606,13 @@ public class CurrencyDetailFragment extends Fragment {
                         //
                     }
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+            }, error -> {
 
-                }
             });
             RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
         } catch(Exception e){
             //
         }
-
-    }
-
-    public static CharSequence trim(CharSequence s, int start, int end) {
-        while (start < end && Character.isWhitespace(s.charAt(start))) {
-            start++;
-        }
-
-        while (end > start && Character.isWhitespace(s.charAt(end - 1))) {
-            end--;
-        }
-
-        return s.subSequence(start, end);
     }
 
     public void getSocialMediaActivity(){
@@ -708,9 +656,19 @@ public class CurrencyDetailFragment extends Fragment {
         RequestSingleton.getInstance(getActivity()).addToRequestQueue(request);
     }
 
-
-
     //Util
+
+    public static CharSequence trim(CharSequence s, int start, int end) {
+        while (start < end && Character.isWhitespace(s.charAt(start))) {
+            start++;
+        }
+
+        while (end > start && Character.isWhitespace(s.charAt(end - 1))) {
+            end--;
+        }
+
+        return s.subSequence(start, end);
+    }
 
     public String convertToDateAndTime(float f){
         Date date = new Date(((long)f)*1000L);
@@ -726,92 +684,6 @@ public class CurrencyDetailFragment extends Fragment {
             timestamp.setText(sdf.format(date));
         }catch(Exception e){
             //
-        }
-    }
-
-    public void getPriceData() {
-        RequestSingleton.getInstance(getActivity()).addToRequestQueue(getStringRequest());
-    }
-
-    public StringRequest getStringRequest() {
-        return new StringRequest(Request.Method.GET, priceRequestURL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    updateCurrencyData(response);
-                }catch (JSONException e){
-                    //
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        });
-    }
-
-    private void updateCurrencyData(String response) throws JSONException {
-        JSONObject totalResponse = new JSONObject(response);
-        JSONArray jsonArray = totalResponse.getJSONArray("result");
-        JSONObject result = jsonArray.getJSONObject(0);
-        currencyInfo.setBid(result.getDouble("Bid"));
-        currencyInfo.setAsk(result.getDouble("Ask"));
-        currencyInfo.setLast(result.getDouble("Last"));
-        currencyInfo.setOpenSellOrders(result.getInt("OpenSellOrders"));
-        currencyInfo.setOpenBuyOrders(result.getInt("OpenBuyOrders"));
-        currencyInfo.setVolume(result.getDouble("Volume"));
-        currencyInfo.setTimeStamp(result.getString("TimeStamp"));
-        currencyInfo.setOpenBuyOrders(result.getInt("OpenBuyOrders"));
-        currencyInfo.setOpenSellOrders(result.getInt("OpenSellOrders"));
-        if(isAdded()) {
-            updateViews();
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-    
-    public void terminate(){
-        running = false;
-    }
-
-    public void start() {
-        running = true;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        minuteChartData.clear();
-        hourChartData.clear();
-        dayChartData.clear();
-        priceGraph.clear();
-        this.currencyInfo = ((MainActivity)getActivity()).currentCurrency;
-        if(currencyInfo != null) {
-            String label = currencyInfo.getName() + " (" + currencyInfo.getSymbol() + ")";
-            currencyLabel.setText(label);
-            updateViews();
-            if(currencyInfo.getSymbol().equalsIgnoreCase("bitcoin")){
-                priceRequestURL = baseURL + "USDT-" + currencyInfo.getSymbol();
-            } else {
-                priceRequestURL = baseURL + "BTC-" + (currencyInfo.getSymbol().equalsIgnoreCase("BCH") ? "BCC" : currencyInfo.getSymbol());
-            }
-
-            setGlobalGraphProperties();
-            loadInitialChart();
-            getFirebaseData();
-            start();
-            new Thread(runnable).start();
-            getSocialMediaActivity();
-            getCoinSnapshot();
-            getFullCoinSnapshotById();
         }
     }
 
@@ -846,15 +718,6 @@ public class CurrencyDetailFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        terminate();
-    }
 
 }

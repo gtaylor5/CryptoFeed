@@ -59,4 +59,6 @@
     <string name="rewardVideo">ca-app-pub-3404074879352583/7187645567</string>
     <string name="portfolio_value">Portfolio Value</string>
     <string name="sign_up_to_create_portfolio">Sign Up to Create Portfolio</string>
+    <string name="two_decimals">%.2f</string>
+    <string name="three_decimals">%.3f</string>
 </resources>

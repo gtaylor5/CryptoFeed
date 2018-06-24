@@ -1,13 +1,15 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.cryptoinc.cryptofeed.CurrencyDetailFragment"
-    android:orientation="vertical">
+
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="com.cryptoinc.cryptofeed.CurrencyDetailFragment"
+android:orientation="vertical">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingBottom="5dp"
@@ -20,23 +22,22 @@
             android:layout_height="wrap_content"
             android:id="@+id/currencyLabel"
             android:textSize="16sp"
-            android:textColor="@color/card_text"/>
+            android:textColor="@color/card_text" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/percentageChange"
             android:textSize="14sp"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:textColor="@color/card_text"/>
+            android:textColor="@color/card_text" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/price"
             android:textSize="14sp"
-            android:layout_toLeftOf="@id/percentageChange"
-            android:layout_marginRight="10dp"
-            android:textColor="@color/card_text"/>
+            android:layout_toStartOf="@id/percentageChange"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/card_text" />
     </RelativeLayout>
     <android.support.v4.widget.NestedScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -51,9 +52,10 @@
             android:orientation="vertical">
 
             <include layout="@layout/chart_area"
+                android:id="@+id/chartArea"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp" />
 
             <include layout="@layout/headings"
                 android:layout_width="match_parent"

@@ -6,6 +6,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.cryptoinc.cryptofeed.MainActivity;
 import com.cryptoinc.cryptofeed.R;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
@@ -43,9 +44,9 @@ public class CurrencyInfoPortfolioViewHolder extends RecyclerView.ViewHolder{
         String quantityText = String.format(Locale.US,"%.2f",quantity) + " " + info.getSymbol();
         currencyQuantity.setText(quantityText);
         if(info.getSymbol().equalsIgnoreCase("BTC")) {
-            currencyValue.setText(defaultformatter.format(quantity * info.getBTC_USD()));
+            currencyValue.setText(defaultformatter.format(quantity * info.getLast()));
         } else {
-            currencyValue.setText(defaultformatter.format(quantity * info.getBTC_USD() * info.getLast()));
+            currencyValue.setText(defaultformatter.format(quantity * info.getLast()));
         }
         setImageView(info);
     }

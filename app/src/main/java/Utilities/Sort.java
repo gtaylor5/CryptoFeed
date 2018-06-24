@@ -26,23 +26,21 @@ public class Sort {
         }
     };
 
-    public static Comparator<CurrencyInfo> sortPriceHighToLow =  new Comparator<CurrencyInfo>() {
-        public int compare(CurrencyInfo c1, CurrencyInfo c2) {
-            if(c2.getLast()*c2.getBTC_USD() < c1.getLast()*c1.getBTC_USD()){
-                return -1;
-            } else if (c2.getLast()*c2.getBTC_USD() > c1.getLast()*c1.getBTC_USD()){
-                return 1;
-            } else {
-                return 0;
-            }
+    public static Comparator<CurrencyInfo> sortPriceHighToLow = (c1, c2) -> {
+        if(c2.getLast() < c1.getLast()){
+            return -1;
+        } else if (c2.getLast() > c1.getLast()){
+            return 1;
+        } else {
+            return 0;
         }
     };
 
     public static Comparator<CurrencyInfo> sortPriceLowToHigh =  new Comparator<CurrencyInfo>() {
         public int compare(CurrencyInfo c1, CurrencyInfo c2) {
-            if(c1.getLast()*c1.getBTC_USD() < c2.getLast()*c2.getBTC_USD()){
+            if(c1.getLast() < c2.getLast()){
                 return -1;
-            } else if (c1.getLast()*c1.getBTC_USD() > c2.getLast()*c2.getBTC_USD()){
+            } else if (c1.getLast() > c2.getLast()){
                 return 1;
             } else {
                 return 0;

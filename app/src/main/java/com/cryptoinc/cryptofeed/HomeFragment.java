@@ -87,12 +87,7 @@ public class HomeFragment extends Fragment {
         manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayout.VERTICAL);
         recyclerView.setLayoutManager(manager);
-        adapter.setCurrencyInfoListListener(new CurrencyInfoAdapter.CurrencyInfoListListener() {
-            @Override
-            public void currencySelected(CurrencyInfo info) {
-                mListener.onHomeFragmentItemSelected(info);
-            }
-        });
+        adapter.setCurrencyInfoListListener(info -> mListener.onHomeFragmentItemSelected(info));
         adapter.favorites.addAll(((MainActivity)getActivity()).favorites);
         setSearchBar(inflater, container);
     }

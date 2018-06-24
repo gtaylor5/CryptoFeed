@@ -228,15 +228,14 @@ public class PortfolioFragment extends Fragment {
             if(getActivity() != null) {
                 for (int i = 0; i < ((MainActivity) getActivity()).currencies.size(); i++) {
                     if (key.equalsIgnoreCase(((MainActivity) getActivity()).currencies.get(i).getSymbol())) {
-                        value += (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).currencies.get(i).getBTC_USD() * portfolio.get(key));
-                        sumPrevDay += (((MainActivity) getActivity()).currencies.get(i).getPrevDay() * ((MainActivity) getActivity()).currencies.get(i).getBTC_USD() *portfolio.get(key));
+                        value += (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).BTC_USD * portfolio.get(key));
+                        sumPrevDay += (((MainActivity) getActivity()).currencies.get(i).getPrevDay() * ((MainActivity) getActivity()).BTC_USD *portfolio.get(key));
                         break;
                     }
                 }
             }
         }
         percentageChange = ((value /sumPrevDay)-1);
-        Log.d("PERCENTAGECHANGE", "calculatePortfolioValue: " + percentageChange);
         if(value < 1){
             portfolioValue.setText(priceFormatterLessThanZero.format(value));
         } else {
@@ -256,7 +255,7 @@ public class PortfolioFragment extends Fragment {
                 for (int i = 0; i < ((MainActivity) getActivity()).currencies.size(); i++) {
                     double currencyValue = 0.0;
                     if (key.equalsIgnoreCase(((MainActivity) getActivity()).currencies.get(i).getSymbol())) {
-                        currencyValue = (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).currencies.get(i).getBTC_USD() * portfolio.get(key));
+                        currencyValue = (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).BTC_USD * portfolio.get(key));
                         entries.add(new PieEntry((float)((currencyValue/value)*100), key));
                         break;
                     }

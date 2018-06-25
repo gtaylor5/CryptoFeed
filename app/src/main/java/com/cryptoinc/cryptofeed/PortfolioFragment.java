@@ -131,29 +131,6 @@ public class PortfolioFragment extends Fragment {
             public void onClick(View view) {
                 if(currentUser != null && getActivity() != null) {
                     showDialog();
-                    /*
-                    new MaterialDialog.Builder(getActivity())
-                            .title("Choose a Currency")
-                            .customView(R.layout.auto_complete, false)
-                            .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
-                                @Override
-                                public boolean onSelection(MaterialDialog dialog, View itemView, int which, final CharSequence text) {
-                                    new MaterialDialog.Builder(getActivity())
-                                            .title("Set Quantity")
-                                            .content(text)
-                                            .inputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
-                                            .input("1.2345", null, false, new MaterialDialog.InputCallback() {
-                                                @Override
-                                                public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-
-                                                    dialog.dismiss();
-                                                }
-                                            }).show();
-                                    dialog.dismiss();
-                                    return true;
-                                }
-                            }).show();
-                            */
                 }
             }
         });
@@ -228,8 +205,8 @@ public class PortfolioFragment extends Fragment {
             if(getActivity() != null) {
                 for (int i = 0; i < ((MainActivity) getActivity()).currencies.size(); i++) {
                     if (key.equalsIgnoreCase(((MainActivity) getActivity()).currencies.get(i).getSymbol())) {
-                        value += (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).BTC_USD * portfolio.get(key));
-                        sumPrevDay += (((MainActivity) getActivity()).currencies.get(i).getPrevDay() * ((MainActivity) getActivity()).BTC_USD *portfolio.get(key));
+                        value += (((MainActivity) getActivity()).currencies.get(i).getLast() * portfolio.get(key));
+                        sumPrevDay += (((MainActivity) getActivity()).currencies.get(i).getPrevDay() * portfolio.get(key));
                         break;
                     }
                 }
@@ -255,7 +232,7 @@ public class PortfolioFragment extends Fragment {
                 for (int i = 0; i < ((MainActivity) getActivity()).currencies.size(); i++) {
                     double currencyValue = 0.0;
                     if (key.equalsIgnoreCase(((MainActivity) getActivity()).currencies.get(i).getSymbol())) {
-                        currencyValue = (((MainActivity) getActivity()).currencies.get(i).getLast() * ((MainActivity) getActivity()).BTC_USD * portfolio.get(key));
+                        currencyValue = (((MainActivity) getActivity()).currencies.get(i).getLast() * portfolio.get(key));
                         entries.add(new PieEntry((float)((currencyValue/value)*100), key));
                         break;
                     }

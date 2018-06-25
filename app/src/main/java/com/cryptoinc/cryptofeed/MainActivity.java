@@ -1,6 +1,7 @@
 package com.cryptoinc.cryptofeed;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     Socket socket;
     JSONArray subarr = new JSONArray();
 
+    int navBarPosition = 1;
+
 
     static {
         fragmentTabMap = new HashMap<>();
@@ -187,9 +190,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
                         //if bitcoin to usd save that value
                         setBTCUSD(message);
-                        if(!message[4].equalsIgnoreCase("4")) {
-                            parseCurrencyPrices((String) args[0]);
-                            runOnUiThread(this::updateTable);
+                        if(message.length > 5) {
+                            if (!message[4].equalsIgnoreCase("4")) {
+                                parseCurrencyPrices((String) args[0]);
+                                runOnUiThread(this::updateTable);
+                            }
                         }
 
                     } else {
@@ -252,7 +257,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                     currencyObject.put(key, values[currentField]);
                 } else {
                     try {
-                        currencyObject.put(key, Float.parseFloat(values[currentField]));
+                        if(key.equalsIgnoreCase("LASTUPDATE")) {
+                            currencyObject.put(key, values[currentField]);
+                        } else {
+                            currencyObject.put(key, Float.parseFloat(values[currentField]));
+                        }
                     } catch (Exception e) {
                         // transaction id was a SHA-digest
                     }
@@ -272,10 +281,17 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                 if(currencies.get(i).getSymbol().equalsIgnoreCase(currencyObject.getString("FROMSYMBOL"))) {
                     if(currencies.get(i).getSymbol().equalsIgnoreCase("BTC")){
                         currencies.get(i).setLast(currencyObject.getDouble("PRICE"));
-                       // currencies.get(i).setVolume(currencyObject.getDouble("VOLUMETO"));
+                        if(currencyObject.has("LASTVOLUMETO")) {
+                            currencies.get(i).setVolume(currencyObject.getDouble("LASTVOLUMETO"));
+                        }
                     } else {
                         currencies.get(i).setLast(currencyObject.getDouble("PRICE") * BTC_USD);
-                       // currencies.get(i).setVolume(currencyObject.getDouble("VOLUMETO")*BTC_USD);
+                        if(currencyObject.has("LASTVOLUMETO")) {
+                            currencies.get(i).setVolume(currencyObject.getDouble("LASTVOLUMETO") * BTC_USD);
+                        }
+                    }
+                    if(currencyObject.has("LASTUPDATE")) {
+                        currencies.get(i).setTimeStamp(currencyObject.getString("LASTUPDATE"));
                     }
                 }
             }
@@ -314,6 +330,8 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             } else {
                 ((HomeFragment) currentFrag).adapter.notifyDataSetChanged();
             }
+        } else if (currentFrag != null && currentFrag.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment")) {
+            ((CurrencyDetailFragment) currentFrag).updateViews();
         }
         try {
             progressBar.setVisibility(View.INVISIBLE);
@@ -364,12 +382,18 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             currencyInfo.setLast(jsonObject.getDouble("PRICE"));
             currencyInfo.setLow(jsonObject.getDouble("LOWHOUR"));
             currencyInfo.setPrevDay(jsonObject.getDouble("HIGH24HOUR"));
+            currencyInfo.setHigh24Hr(jsonObject.getDouble("HIGH24HOUR"));
+            currencyInfo.setLow24Hr(jsonObject.getDouble("LOW24HOUR"));
             currencyInfo.setVolume(jsonObject.getDouble("VOLUME24HOUR"));
+            currencyInfo.setVolume24Hr(jsonObject.getDouble("VOLUME24HOUR"));
         } else {
             currencyInfo.setLast(jsonObject.getDouble("PRICE")*BTC_USD);
             currencyInfo.setLow(jsonObject.getDouble("LOWHOUR")*BTC_USD);
-            currencyInfo.setPrevDay(jsonObject.getDouble("LOW24HOUR")*BTC_USD);
+            currencyInfo.setPrevDay(jsonObject.getDouble("HIGH24HOUR")*BTC_USD);
+            currencyInfo.setHigh24Hr(jsonObject.getDouble("HIGH24HOUR")*BTC_USD);
+            currencyInfo.setLow24Hr(jsonObject.getDouble("LOW24HOUR")*BTC_USD);
             currencyInfo.setVolume(jsonObject.getDouble("VOLUME24HOUR")*BTC_USD);
+            currencyInfo.setVolume24Hr(jsonObject.getDouble("VOLUME24HOUR")*BTC_USD);
         }
 
         currencyInfo.setSymbol(jsonObject.getString("FROMSYMBOL"));
@@ -488,7 +512,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                 getSupportFragmentManager().popBackStackImmediate();
                 Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer1);
                 if (currentFragment != null) {
-                    //bottomNavigation.enableItemAtPosition(fragmentTabMap.get(currentFragment.getClass().getSimpleName()));
                     if(currentFragment.getClass().getSimpleName().equalsIgnoreCase("CurrencyDetailFragment")){
                         bottomNavigation.setCurrentItem(fragmentTabMap.get(currentFragment.getClass().getSimpleName()), false);
                     } else {
@@ -538,7 +561,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
         }
     }
 
-    public void showPopUpWindow(final int sender, String initialHeadingText, String secondaryHeadingText, String initialLoginText, String secondaryLoginText) {
+    public void showPopUpWindow(final int sender, String signUpHeading, String loginHeading, String signUpAction, String loginAction) {
         final MaterialDialog materialDialog = new MaterialDialog.Builder(this)
                 .backgroundColor(getResources().getColor(R.color.background, null))
                 .titleColor(getResources().getColor(R.color.white, null))
@@ -552,19 +575,20 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
             final TextView heading = popUp.findViewById(R.id.alertHeading);
             final Button login = popUp.findViewById(R.id.login);
             switchView.setOnClickListener(v -> {
-                if (switchView.getText().toString().contains("Sign In")) {
-                    switchView.setText(R.string.newuser);
-                    heading.setText(initialHeadingText);
-                    login.setText(initialLoginText);
+                if(switchView.getText().toString().contains("Already Registered?")) {
+                    heading.setText(loginHeading);
+                    login.setText(loginAction);
+                    switchView.setText("New User? Sign Up");
                 } else {
-                    switchView.setText(R.string.already);
-                    heading.setText(secondaryHeadingText);
-                    login.setText(secondaryLoginText);
+                    heading.setText(signUpHeading);
+                    login.setText(signUpAction);
+                    switchView.setText("Already Registered? Sign In");
                 }
             });
 
             login.setOnClickListener(view -> authenticateNewUser(materialDialog, email, password, sender));
             materialDialog.show();
+            materialDialog.setOnDismissListener(dialog -> bottomNavigation.setCurrentItem(navBarPosition, false));
         }
     }
 
@@ -716,26 +740,20 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
 
     public void authenticateNewUser(final MaterialDialog popupWindow, final EditText email, final EditText password, final int sender) {
         if(email.getText().toString().contains("@") && password.getText().toString().length() != 0){
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(FirebaseAuth.getInstance().getCurrentUser() != null) {
-                        Toast.makeText(getApplicationContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
-                        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                        getFavorites();
-                        bottomNavigation.setCurrentItem(sender, true);
-                        popupWindow.dismiss();
-                    }
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(task -> {
+                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    Toast.makeText(getApplicationContext(), "Sign In Successful!", Toast.LENGTH_LONG).show();
+                    currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    getFavorites();
+                    bottomNavigation.setCurrentItem(sender, true);
+                    popupWindow.dismiss();
                 }
-            }).addOnFailureListener(e -> FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                        Toast.makeText(getApplicationContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
-                        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                        getFavorites();
-                        popupWindow.dismiss();
-                    }
+            }).addOnFailureListener(e -> FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(task -> {
+                if(FirebaseAuth.getInstance().getCurrentUser() != null){
+                    Toast.makeText(getApplicationContext(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
+                    currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    getFavorites();
+                    popupWindow.dismiss();
                 }
             }));
         } else if (!email.getText().toString().contains("@")){
@@ -780,6 +798,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         showFragment(fragment);
                     }
                     bottomNavigation.enableItemAtPosition(0);
+                    navBarPosition = 0;
                     break;
                 }
                 case 1: {
@@ -794,6 +813,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         showFragment(fragment);
                     }
                     bottomNavigation.enableItemAtPosition(1);
+                    navBarPosition = 1;
                     break;
                 }
                 case 2: {
@@ -807,9 +827,10 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                             showFragment(fragment);
                         }
                         bottomNavigation.enableItemAtPosition(2);
+                        navBarPosition = 2;
                         break;
                     } else {
-                        showPopUpWindow(2, "Please Sign Up to Create a Portfolio", "Sign In", "Please Sign In to Create a Portfolio", "Sign Up");
+                        showPopUpWindow(2, "Please Sign Up to Create a Portfolio", "Sign In To View Portfolio", "Sign Up", "Login");
                         break;
                     }
                 }
@@ -821,6 +842,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
                         showFragment(fragment);
                     }
                     bottomNavigation.enableItemAtPosition(3);
+                    navBarPosition = 3;
                     break;
                 }
             }

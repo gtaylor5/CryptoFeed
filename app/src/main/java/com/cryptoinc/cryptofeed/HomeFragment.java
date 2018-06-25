@@ -123,7 +123,7 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-        setSearchBarMenu(inflater, container);
+        setSearchBarMenu();
     }
 
     public void trackAnalytics(String key, String value, String event){
@@ -134,53 +134,51 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void setSearchBarMenu(final LayoutInflater inflater, final ViewGroup container) {
-        searchBar.getMenu().setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if(getActivity()!= null) {
-                    ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
-                }
-                switch (item.getItemId()){
-                    case R.id.pricehilo:
-                        sortType = 1;
-                        trackAnalytics("sort", "price_hi_to_low", "sort_menu_clicked");
-                        break;
-                    case R.id.pricelohi:
-                        sortType = 2;
-                        trackAnalytics("sort", "price_low_to_high", "sort_menu_clicked");
-                        checkIfChecked(item);
-                        break;
-                    case R.id.percenthilo:
-                        sortType = 3;
-                        trackAnalytics("sort", "percent_high_to_low", "sort_menu_clicked");
-                        checkIfChecked(item);
-                        break;
-                    case R.id.percentlohi:
-                        sortType = 4;
-                        trackAnalytics("sort", "price_high_to_low", "sort_menu_clicked");
-                        checkIfChecked(item);
-                        break;
-                    case R.id.fav:
-                        trackAnalytics("sort", "favorites checked", "sort_menu_clicked");
-                        if(!item.isChecked()) {
-                            item.setChecked(true);
-                            ((MainActivity)getActivity()).favoritesChecked = true;
-                            FirebaseUser user = ((MainActivity)getActivity()).currentUser;
-                            if (user == null) {
-                                showPopUpWindow(inflater, container);
-                                item.setChecked(false);
-                                ((MainActivity)getActivity()).favoritesChecked = false;
-                            }
-                        } else {
+    public void setSearchBarMenu() {
+        searchBar.getMenu().setOnMenuItemClickListener(item -> {
+            if(getActivity()!= null) {
+                ((MainActivity) getActivity()).progressBar.setVisibility(View.VISIBLE);
+            }
+            switch (item.getItemId()){
+                case R.id.pricehilo:
+                    sortType = 1;
+                    trackAnalytics("sort", "price_hi_to_low", "sort_menu_clicked");
+                    break;
+                case R.id.pricelohi:
+                    sortType = 2;
+                    trackAnalytics("sort", "price_low_to_high", "sort_menu_clicked");
+                    checkIfChecked(item);
+                    break;
+                case R.id.percenthilo:
+                    sortType = 3;
+                    trackAnalytics("sort", "percent_high_to_low", "sort_menu_clicked");
+                    checkIfChecked(item);
+                    break;
+                case R.id.percentlohi:
+                    sortType = 4;
+                    trackAnalytics("sort", "price_high_to_low", "sort_menu_clicked");
+                    checkIfChecked(item);
+                    break;
+                case R.id.fav:
+                    trackAnalytics("sort", "favorites checked", "sort_menu_clicked");
+                    if(!item.isChecked()) {
+                        item.setChecked(true);
+                        ((MainActivity)getActivity()).favoritesChecked = true;
+                        FirebaseUser user = ((MainActivity)getActivity()).currentUser;
+                        if (user == null) {
+                            ((MainActivity)getActivity()).showPopUpWindow(1, "Sign Up to Add Favorites",
+                                    "Login To See Favorites", "Sign Up", "Login");
                             item.setChecked(false);
                             ((MainActivity)getActivity()).favoritesChecked = false;
                         }
-                        break;
-                }
-                selectOne();
-                return  false;
+                    } else {
+                        item.setChecked(false);
+                        ((MainActivity)getActivity()).favoritesChecked = false;
+                    }
+                    break;
             }
+            selectOne();
+            return  false;
         });
     }
 
@@ -198,72 +196,6 @@ public class HomeFragment extends Fragment {
             } else {
                 searchBar.getMenu().getMenu().getItem(i).setChecked(false);
             }
-        }
-    }
-
-    public void showPopUpWindow(LayoutInflater inflater, ViewGroup container) {
-        final PopupWindow popupWindow;
-        View popUp = inflater.inflate(R.layout.sign_up_alert, container, false);
-        final EditText email = popUp.findViewById(R.id.email);
-        final EditText password = popUp.findViewById(R.id.password);
-        final Button login = popUp.findViewById(R.id.signUp);
-        final TextView switchView = popUp.findViewById(R.id.switchview);
-        final TextView heading = popUp.findViewById(R.id.alertHeading);
-        switchView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (switchView.getText().toString().contains("Sign In")) {
-                    switchView.setText(R.string.newuser);
-                    heading.setText(R.string.please_sign_in_to_add_favorites);
-                } else {
-                    switchView.setText(R.string.already);
-                    heading.setText(R.string.please_sign_up_to_add_favorites);
-                }
-            }
-        });
-
-        popupWindow = new PopupWindow(popUp, getActivity().getWindow().getAttributes().width, getActivity().getWindow().getAttributes().height, true);
-        popupWindow.showAtLocation(popUp, Gravity.CENTER_VERTICAL, 0, 0);
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                authenticateNewUser(popupWindow, email, password);
-            }
-        });
-    }
-
-    public void authenticateNewUser(final PopupWindow popupWindow, final EditText email, final EditText password) {
-        if(email.getText().toString().contains("@") && password.getText().toString().length() != 0){
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                        Toast.makeText(getActivity(), "Sign In Successful!", Toast.LENGTH_LONG).show();
-                        ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                        ((MainActivity)getActivity()).initializeFirebaseDB();
-                        popupWindow.dismiss();
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(FirebaseAuth.getInstance().getCurrentUser() != null){
-                                Toast.makeText(getActivity(), "Sign Up Successful!", Toast.LENGTH_LONG).show();
-                                ((MainActivity)getActivity()).currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                                ((MainActivity)getActivity()).initializeFirebaseDB();
-                                popupWindow.dismiss();
-                            }
-                        }
-                    });
-                }
-            });
-        } else if (!email.getText().toString().contains("@")){
-            Toast.makeText(getActivity(), "Invalid Email Address. Please try again.", Toast.LENGTH_LONG).show();
-        } else if (password.getText().toString().length() == 0){
-            Toast.makeText(getActivity(), "You must enter a pasaword.", Toast.LENGTH_LONG).show();
         }
     }
 

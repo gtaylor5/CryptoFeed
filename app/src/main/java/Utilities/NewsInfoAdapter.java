@@ -33,12 +33,7 @@ public class NewsInfoAdapter extends RecyclerView.Adapter<NewsInfoViewHolder> {
     public void onBindViewHolder(NewsInfoViewHolder holder, int position) {
         final NewsInfo info = newsList.get(position);
         holder.setViews(info);
-        holder.v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                newsInfoListListener.newsSelected(info);
-            }
-        });
+        holder.v.setOnClickListener(v -> newsInfoListListener.newsSelected(info));
     }
 
     private NewsInfoListListener newsInfoListListener;

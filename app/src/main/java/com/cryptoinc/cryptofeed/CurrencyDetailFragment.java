@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.ExecutorDelivery;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -64,6 +66,12 @@ public class CurrencyDetailFragment extends Fragment {
 
     TextView twitterSocialActivity;
     TextView redditSocialActivity;
+
+    // Header Info
+
+    TextView currencySymbol;
+    TextView percentageChange;
+    TextView price;
 
     // Price Stats
 
@@ -194,6 +202,7 @@ public class CurrencyDetailFragment extends Fragment {
             getHourChartData();
             getDayChartData();
         }
+        parseDate();
     }
 
     public void setStyling(ArrayList<Entry> chartData, String label) {
@@ -327,6 +336,9 @@ public class CurrencyDetailFragment extends Fragment {
 
     public void initializeViews(View v) {
 
+            price = v.findViewById(R.id.price);
+            percentageChange = v.findViewById(R.id.percentageChange);
+            currencySymbol = v.findViewById(R.id.currencyLabel);
 
             twitterSocialActivity = v.findViewById(R.id.twitterSocialActivity);
             redditSocialActivity = v.findViewById(R.id.redditSocialActivity);
@@ -364,7 +376,6 @@ public class CurrencyDetailFragment extends Fragment {
     public void updateViews(){
         if(currencyInfo.getSymbol().equalsIgnoreCase("btc")){
             if(!chartClicked) {
-
                 parseDate();
             }
         } else {
@@ -377,6 +388,25 @@ public class CurrencyDetailFragment extends Fragment {
             }
             parseDate();
         }
+
+        percentageChange.setText(String.format(Locale.US,"%.3f",currencyInfo.getPercentageChange()) + " %");
+        if(currencyInfo.getPercentageChange() < 0) {
+            percentageChange.setTextColor(getResources().getColor(R.color.negative_red, null));
+        } else {
+            percentageChange.setTextColor(getResources().getColor(R.color.positive, null));
+        }
+        currencySymbol.setText(currencyInfo.getName() + " (" + currencyInfo.getSymbol() + ")");
+
+        if(currencyInfo.getLast() < 1) {
+            price.setText(lessThanOne.format(currencyInfo.getLast()));
+        } else {
+            price.setText(formatter.format(currencyInfo.getLast()));
+        }
+
+        priceHigh.setText(formatter.format(currencyInfo.getHigh24Hr()));
+        priceLow.setText(formatter.format(currencyInfo.getLow24Hr()));
+        volume.setText(formatter.format(currencyInfo.getVolume24Hr()));
+
         if(isAdded()) {
             statisticsView.setText(R.string.stats);
             aboutView.setText(R.string.about);
@@ -391,77 +421,68 @@ public class CurrencyDetailFragment extends Fragment {
     }
 
     public void setOnClickListeners() {
-        minuteData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                priceGraph.setData(null);
-                if (hourData.isPressed()) {
-                    hourData.setPressed(false);
-                }
-                if (dayData.isPressed()) {
-                    dayData.setPressed(false);
-                }
-                minuteData.setPressed(true);
-                hourData.setTextColor(Color.WHITE);
+        minuteData.setOnClickListener(v -> {
+            priceGraph.setData(null);
+            if (hourData.isPressed()) {
+                hourData.setPressed(false);
+            }
+            if (dayData.isPressed()) {
+                dayData.setPressed(false);
+            }
+            minuteData.setPressed(true);
+            hourData.setTextColor(Color.WHITE);
+            dayData.setTextColor(Color.WHITE);
+            if(isAdded()) {
+                hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+
+                minuteData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                minuteData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                setStyling(minuteChartData, "Minutely Chart");
+            }
+        });
+
+        hourData.setOnClickListener(v -> {
+            priceGraph.setData(null);
+            if (minuteData.isPressed()) {
+                minuteData.setPressed(false);
+            }
+            if (dayData.isPressed()) {
+                dayData.setPressed(false);
+            }
+            if(isAdded()) {
+                hourData.setPressed(true);
+                minuteData.setTextColor(Color.WHITE);
                 dayData.setTextColor(Color.WHITE);
-                if(isAdded()) {
-                    hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
-                    dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
 
-                    minuteData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                    setStyling(minuteChartData, "Minutely Chart");
-                }
+                minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+
+                hourData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                hourData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                setStyling(hourChartData, "Hourly Chart");
             }
         });
 
-        hourData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                priceGraph.setData(null);
-                if (minuteData.isPressed()) {
-                    minuteData.setPressed(false);
-                }
-                if (dayData.isPressed()) {
-                    dayData.setPressed(false);
-                }
-                if(isAdded()) {
-                    hourData.setPressed(true);
-                    minuteData.setTextColor(Color.WHITE);
-                    dayData.setTextColor(Color.WHITE);
-
-                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
-                    dayData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
-
-                    hourData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                    hourData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                    setStyling(hourChartData, "Hourly Chart");
-                }
+        dayData.setOnClickListener(v -> {
+            priceGraph.setData(null);
+            if (hourData.isPressed()) {
+                hourData.setPressed(false);
             }
-        });
+            if (minuteData.isPressed()) {
+                minuteData.setPressed(false);
+            }
+            if(isAdded()) {
+                hourData.setTextColor(Color.WHITE);
+                minuteData.setTextColor(Color.WHITE);
+                dayData.setPressed(true);
 
-        dayData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                priceGraph.setData(null);
-                if (hourData.isPressed()) {
-                    hourData.setPressed(false);
-                }
-                if (minuteData.isPressed()) {
-                    minuteData.setPressed(false);
-                }
-                if(isAdded()) {
-                    hourData.setTextColor(Color.WHITE);
-                    minuteData.setTextColor(Color.WHITE);
-                    dayData.setPressed(true);
+                minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
+                hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
 
-                    minuteData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
-                    hourData.setBackgroundColor(getResources().getColor(R.color.card_color, null));
-
-                    dayData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
-                    dayData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
-                    setStyling(dayChartData, "Daily Chart");
-                }
+                dayData.setTextColor(getResources().getColor(R.color.graph_line_color, null));
+                dayData.setBackgroundColor(getResources().getColor(R.color.card_text, null));
+                setStyling(dayChartData, "Daily Chart");
             }
         });
 
@@ -471,62 +492,50 @@ public class CurrencyDetailFragment extends Fragment {
 
     public void getHourChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histohour?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("Data");
-                    for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject object = jsonArray.getJSONObject(i);
-                        String timeStr = object.get("time").toString();
-                        String closeStr = object.get("close").toString();
-                        float time = Float.parseFloat(timeStr);
-                        float value = Float.parseFloat(closeStr);
-                        if(value == 0f)
-                            continue;
-                        hourChartData.add(new Entry(time, value));
-                    }
-                }catch (JSONException e){
-                    //
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, response -> {
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                JSONArray jsonArray = jsonObject.getJSONArray("Data");
+                for(int i = 0; i < jsonArray.length(); i++){
+                    JSONObject object = jsonArray.getJSONObject(i);
+                    String timeStr = object.get("time").toString();
+                    String closeStr = object.get("close").toString();
+                    float time = Float.parseFloat(timeStr);
+                    float value = Float.parseFloat(closeStr);
+                    if(value == 0f)
+                        continue;
+                    hourChartData.add(new Entry(time, value));
                 }
+            }catch (JSONException e){
+                //
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+        }, error -> {
 
-            }
         });
         RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
 
     public void getDayChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histoday?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("Data");
-                    for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject object = jsonArray.getJSONObject(i);
-                        String timeStr = object.get("time").toString();
-                        String closeStr = object.get("close").toString();
-                        float time = Float.parseFloat(timeStr);
-                        float value = Float.parseFloat(closeStr);
-                        if(value == 0f)
-                            continue;
-                        dayChartData.add(new Entry(time, value));
-                    }
-                }catch (JSONException e){
-                    //
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, response -> {
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                JSONArray jsonArray = jsonObject.getJSONArray("Data");
+                for(int i = 0; i < jsonArray.length(); i++){
+                    JSONObject object = jsonArray.getJSONObject(i);
+                    String timeStr = object.get("time").toString();
+                    String closeStr = object.get("close").toString();
+                    float time = Float.parseFloat(timeStr);
+                    float value = Float.parseFloat(closeStr);
+                    if(value == 0f)
+                        continue;
+                    dayChartData.add(new Entry(time, value));
                 }
+            }catch (JSONException e){
+                //
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+        }, error -> {
 
-            }
         });
 
         RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
@@ -534,33 +543,27 @@ public class CurrencyDetailFragment extends Fragment {
 
     private void getMinuteChartData() {
         String requestString = "https://min-api.cryptocompare.com/data/histominute?fsym="+currencyInfo.getSymbol()+"&tsym=USD&limit=2000&aggregate=3&e=CCCAGG";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray jsonArray = jsonObject.getJSONArray("Data");
-                    for(int i = 0; i < jsonArray.length(); i++){
-                        JSONObject object = jsonArray.getJSONObject(i);
-                        String timeStr = object.get("time").toString();
-                        String closeStr = object.get("close").toString();
-                        float time = Float.parseFloat(timeStr);
-                        float value = Float.parseFloat(closeStr);
-                        if(value == 0f)
-                            continue;
-                        minuteChartData.add(new Entry(time, value));
-                    }
-                    chartProgress.setVisibility(View.INVISIBLE);
-                    minuteData.callOnClick();
-                }catch (JSONException e){
-                    //
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, response -> {
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                JSONArray jsonArray = jsonObject.getJSONArray("Data");
+                for(int i = 0; i < jsonArray.length(); i++){
+                    JSONObject object = jsonArray.getJSONObject(i);
+                    String timeStr = object.get("time").toString();
+                    String closeStr = object.get("close").toString();
+                    float time = Float.parseFloat(timeStr);
+                    float value = Float.parseFloat(closeStr);
+                    if(value == 0f)
+                        continue;
+                    minuteChartData.add(new Entry(time, value));
                 }
+                chartProgress.setVisibility(View.INVISIBLE);
+                minuteData.callOnClick();
+            }catch (JSONException e){
+                //
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+        }, error -> {
 
-            }
         });
         RequestSingleton.getInstance(getActivity()).addToRequestQueue(stringRequest);
     }
@@ -579,32 +582,29 @@ public class CurrencyDetailFragment extends Fragment {
             }
 
             String requestString = baseCurrencyAboutURL + id;
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject responseObject = new JSONObject(response);
-                        JSONObject dataObject = responseObject.getJSONObject("Data");
-                        JSONObject generalObject = dataObject.getJSONObject("General");
-                        Iterator<String> it = generalObject.keys();
-                        while(it.hasNext()){
-                            String key = it.next();
-                            if(key.equalsIgnoreCase("description")){
-                                String value = generalObject.getString(key);
-                                if(value == null){
-                                    break;
-                                }
-                                aboutText.setText(trim(Html.fromHtml(value), 0, Html.fromHtml(value).length()));
-                                aboutText.setTextColor(getResources().getColor(R.color.white, null));
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestString, response -> {
+                try {
+                    JSONObject responseObject = new JSONObject(response);
+                    JSONObject dataObject = responseObject.getJSONObject("Data");
+                    JSONObject generalObject = dataObject.getJSONObject("General");
+                    Iterator<String> it = generalObject.keys();
+                    while(it.hasNext()){
+                        String key = it.next();
+                        if(key.equalsIgnoreCase("description")){
+                            String value = generalObject.getString(key);
+                            if(value == null){
                                 break;
                             }
+                            aboutText.setText(trim(Html.fromHtml(value), 0, Html.fromHtml(value).length()));
+                            aboutText.setTextColor(getResources().getColor(R.color.white, null));
+                            break;
                         }
-                        if(aboutText.getText() == null){
-                            aboutCardView.setVisibility(View.INVISIBLE);
-                        }
-                    } catch (Exception e){
-                        //
                     }
+                    if(aboutText.getText() == null){
+                        aboutCardView.setVisibility(View.INVISIBLE);
+                    }
+                } catch (Exception e){
+                    //
                 }
             }, error -> {
 
@@ -617,35 +617,32 @@ public class CurrencyDetailFragment extends Fragment {
 
     public void getSocialMediaActivity(){
         String requestString = baseSocialActivityURL + currencyInfo.getSymbol();
-        StringRequest request = new StringRequest(Request.Method.GET, requestString, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject json = new JSONObject(response);
-                    JSONObject jsonObject = json.getJSONObject(currencyInfo.getSymbol());
-                    DecimalFormat decimalFormat = new DecimalFormat("#,###");
-                    if(isAdded()) {
-                        if (jsonObject.getString("reddit_volume_24h") != null) {
-                            int val = Integer.parseInt(jsonObject.getString("reddit_volume_24h"));
-                            redditSocialActivity.setText(decimalFormat.format(val));
-                            redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
-                        } else {
-                            redditSocialActivity.setText("--");
-                            redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
-                        }
-                        if (jsonObject.getString("twitter_volume_24h") != null) {
-                            int val = Integer.parseInt(jsonObject.getString("twitter_volume_24h"));
-                            twitterSocialActivity.setText(decimalFormat.format(val));
-                            twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
-
-                        } else {
-                            twitterSocialActivity.setText("--");
-                            twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
-                        }
+        StringRequest request = new StringRequest(Request.Method.GET, requestString, response -> {
+            try {
+                JSONObject json = new JSONObject(response);
+                JSONObject jsonObject = json.getJSONObject(currencyInfo.getSymbol());
+                DecimalFormat decimalFormat = new DecimalFormat("#,###");
+                if(isAdded()) {
+                    if (jsonObject.getString("reddit_volume_24h") != null) {
+                        int val = Integer.parseInt(jsonObject.getString("reddit_volume_24h"));
+                        redditSocialActivity.setText(decimalFormat.format(val));
+                        redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                    } else {
+                        redditSocialActivity.setText("--");
+                        redditSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
                     }
-                }catch (JSONException e){
-                    //
+                    if (jsonObject.getString("twitter_volume_24h") != null) {
+                        int val = Integer.parseInt(jsonObject.getString("twitter_volume_24h"));
+                        twitterSocialActivity.setText(decimalFormat.format(val));
+                        twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+
+                    } else {
+                        twitterSocialActivity.setText("--");
+                        twitterSocialActivity.setTextColor(getResources().getColor(R.color.white, null));
+                    }
                 }
+            }catch (JSONException e){
+                //
             }
         }, new Response.ErrorListener() {
             @Override
@@ -678,12 +675,11 @@ public class CurrencyDetailFragment extends Fragment {
 
     public void parseDate() {
         try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US);
-            Date date = format.parse(currencyInfo.getTimeStamp());
+            Date date = new Date(Long.parseLong(currencyInfo.getTimeStamp())*1000);
             SimpleDateFormat sdf = new SimpleDateFormat("M/d/yyyy H:mm:ss", Locale.US);
             timestamp.setText(sdf.format(date));
         }catch(Exception e){
-            //
+            e.printStackTrace();
         }
     }
 

@@ -48,34 +48,31 @@ public class CurrencyInfoPortfolioAdapter extends RecyclerView.Adapter<CurrencyI
     public void onBindViewHolder(final CurrencyInfoPortfolioViewHolder holder, int position) {
         final CurrencyInfo currencyInfo = currencies.get(position);
         holder.setViews(currencyInfo, portfolio.get(currencyInfo.getSymbol()));
-        holder.getV().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle params = new Bundle();
-                params.putString("currency_name", currencyInfo.getName());
-                mFirebaseAnalytics.logEvent("currency_clicked", params);
-                new MaterialDialog.Builder(layoutInflater.getContext())
-                        .backgroundColor(layoutInflater.getContext().getResources().getColor(R.color.background, null))
-                        .title("Set Quantity")
-                        .titleColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
-                        .content(currencyInfo.getSymbol())
-                        .contentColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
-                        .inputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
-                        .input("You have: "+holder.currencyQuantity.getText(), null, false, new MaterialDialog.InputCallback() {
-                            @Override
-                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                                try {
-                                    FirebaseDatabase.getInstance().getReference().child("users")
-                                            .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                            .child("portfolio")
-                                            .child(currencyInfo.getSymbol()).setValue(Double.parseDouble(input.toString()));
-                                } catch (Exception e){
-                                    Toast.makeText(layoutInflater.getContext(),"Error editing your portfolio. Please try again.", Toast.LENGTH_LONG).show();
-                                }
-                                dialog.dismiss();
+        holder.getV().setOnClickListener(v -> {
+            Bundle params = new Bundle();
+            params.putString("currency_name", currencyInfo.getName());
+            mFirebaseAnalytics.logEvent("currency_clicked", params);
+            new MaterialDialog.Builder(layoutInflater.getContext())
+                    .backgroundColor(layoutInflater.getContext().getResources().getColor(R.color.background, null))
+                    .title("Set Quantity")
+                    .titleColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
+                    .content(currencyInfo.getSymbol())
+                    .contentColor(layoutInflater.getContext().getResources().getColor(R.color.white, null))
+                    .inputType(InputType.TYPE_NUMBER_FLAG_DECIMAL)
+                    .input("You have: "+holder.currencyQuantity.getText(), null, false, new MaterialDialog.InputCallback() {
+                        @Override
+                        public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                            try {
+                                FirebaseDatabase.getInstance().getReference().child("users")
+                                        .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .child("portfolio")
+                                        .child(currencyInfo.getSymbol()).setValue(Double.parseDouble(input.toString()));
+                            } catch (Exception e){
+                                Toast.makeText(layoutInflater.getContext(),"Error editing your portfolio. Please try again.", Toast.LENGTH_LONG).show();
                             }
-                        }).show();
-            }
+                            dialog.dismiss();
+                        }
+                    }).show();
         });
     }
 

@@ -19,6 +19,7 @@ public class NewsInfo implements Comparable<NewsInfo>{
     public String Source;
     public String pubDate;
     public String description;
+    public String imageLink;
 
     public long dateInMills;
 
@@ -52,10 +53,17 @@ public class NewsInfo implements Comparable<NewsInfo>{
         return pubDate;
     }
 
-    public void setPubDate(String pubDate) throws ParseException{
-        DateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+    public String getImageLink() {
+        return imageLink;
+    }
+
+    public void setImageLink(String imageLink) {
+        this.imageLink = imageLink;
+    }
+
+    public void setPubDate(String pubDate) {
         DateFormat target = new SimpleDateFormat("M/d/yyyy H:mm", Locale.US);
-        Date date = format.parse(pubDate);
+        Date date = new Date(Long.parseLong(pubDate));
         dateInMills = date.getTime();
         this.pubDate = target.format(date);
     }

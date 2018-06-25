@@ -2,29 +2,16 @@ package Utilities;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.PopupWindow;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cryptoinc.cryptofeed.MainActivity;
 import com.cryptoinc.cryptofeed.R;
-import com.cryptoinc.cryptofeed.databinding.CurrencyinfoBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +36,7 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
     private ViewGroup container;
     private FirebaseAnalytics mFirebaseAnalytics;
     Activity currentActivity;
+
     public CurrencyInfoAdapter(LayoutInflater layoutInflater, ArrayList<CurrencyInfo> currencies, HashSet<String> favorites, Activity activity){
         this.layoutInflater = layoutInflater;
         this.currencies = currencies;
@@ -79,9 +67,9 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if(user == null){
                 MainActivity activity = (MainActivity) currentActivity;
-                activity.showPopUpWindow(1, activity.getResources().getString(R.string.please_sign_up_to_add_favorites),
-                        activity.getResources().getString(R.string.sign_up), activity.getResources().getString(R.string.please_sign_in_to_add_favorites),
-                                activity.getResources().getString(R.string.already));
+                activity.showPopUpWindow(1, "Sign Up To Add Favorites",
+                        "Login To Add Favorites",
+                        "Sign Up", "Login");
             } else {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 final DatabaseReference reference = database.getReference("users").child(user.getUid()).child("favorites");
@@ -95,7 +83,6 @@ public class CurrencyInfoAdapter extends RecyclerView.Adapter<CurrencyInfoViewHo
                                     favorites.remove(currencyInfo.getSymbol());
                                     ref.setValue(null);
                                     holder.favoriteImage.setColorFilter(holder.getV().getResources().getColor(R.color.white, null));
-                                    //notifyDataSetChanged();
                                     return;
                                 }
                             }

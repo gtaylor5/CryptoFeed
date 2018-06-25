@@ -99,7 +99,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_marginBottom="0dp"
                         android:layout_marginRight="10dp"
-                        android:layout_alignTop="@+id/curreny_name"
+                        android:layout_alignTop="@+id/currency_name"
                         android:textColor="@color/card_text"
                         android:layout_marginLeft="10dp"/>
                     <TextView

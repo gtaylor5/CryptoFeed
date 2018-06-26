@@ -218,10 +218,12 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     }
 
     private void setBTCUSD(String[] message) {
-        if(message[2].equalsIgnoreCase("BTC") && message.length > 5 && !message[4].equalsIgnoreCase("4")) {
-            this.BTC_USD = Double.parseDouble(message[5]);
-        } else if(message[2].equalsIgnoreCase("BTC") && !coinsLoaded  && message.length > 5) {
-            this.BTC_USD = Double.parseDouble(message[5]);
+        if(message.length > 4){
+            if(message[2].equalsIgnoreCase("BTC") && message.length > 5 && !message[4].equalsIgnoreCase("4")) {
+                this.BTC_USD = Double.parseDouble(message[5]);
+            } else if(message[2].equalsIgnoreCase("BTC") && !coinsLoaded  && message.length > 5) {
+                this.BTC_USD = Double.parseDouble(message[5]);
+            }
         }
     }
 
@@ -442,7 +444,9 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnHo
     protected void onPause() {
         super.onPause();
         try {
-            socket.emit("SubRemove", (new JSONObject()).put("subs", subarr));
+            if(socket != null) {
+                socket.emit("SubRemove", (new JSONObject()).put("subs", subarr));
+            }
         } catch (JSONException e){}
     }
 
